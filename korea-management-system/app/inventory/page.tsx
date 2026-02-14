@@ -3,8 +3,13 @@
 import { Package, Search, Plus, Edit, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useLocale } from '@/lib/LocaleContext';
+import { translations } from '@/lib/translations';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function InventoryPage() {
+  const { locale } = useLocale();
+  const t = translations[locale];
   const [searchQuery, setSearchQuery] = useState('');
 
   const inventory = [
@@ -23,17 +28,20 @@ export default function InventoryPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Link href="/" className="text-gray-600 hover:text-gray-900">
-                ← 뒤로
+                {t.back}
               </Link>
               <div className="flex items-center gap-2">
                 <Package className="w-6 h-6 text-orange-600" />
-                <h1 className="text-2xl font-bold text-gray-900">재고 관리</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t.inventoryManagementTitle}</h1>
               </div>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
-              <Plus className="w-4 h-4" />
-              새 제품 추가
-            </button>
+            <div className="flex items-center gap-4">
+              <LanguageSwitcher />
+              <button className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+                <Plus className="w-4 h-4" />
+                {t.addNewProduct}
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -179,7 +187,7 @@ export default function InventoryPage() {
                         ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {item.status === 'in_stock' ? '재고 있음' : item.status === 'low_stock' ? '재고 부족' : '품절'}
+                      {item.status === 'in_stock' ? t.inStock : item.status === 'low_stock' ? t.lowStock : t.outOfStock}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

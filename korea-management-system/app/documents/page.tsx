@@ -3,9 +3,23 @@
 import { FileText, Search, Plus, Download, Eye, Trash2, Filter } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useLocale } from '@/lib/LocaleContext';
+import { translations } from '@/lib/translations';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function DocumentsPage() {
+  const { locale } = useLocale();
+  const t = translations[locale];
   const [searchQuery, setSearchQuery] = useState('');
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case '승인됨': return t.approved;
+      case '검토중': return t.pending;
+      case '초안': return t.draft;
+      default: return status;
+    }
+  };
 
   const documents = [
     { id: 1, name: '2026년 1분기 매출 보고서', type: 'PDF', size: '2.4 MB', date: '2026-02-10', category: '재무', status: '승인됨' },
@@ -23,17 +37,20 @@ export default function DocumentsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Link href="/" className="text-gray-600 hover:text-gray-900">
-                ← 뒤로
+                {t.back}
               </Link>
               <div className="flex items-center gap-2">
                 <FileText className="w-6 h-6 text-green-600" />
-                <h1 className="text-2xl font-bold text-gray-900">문서 관리</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t.documentManagementTitle}</h1>
               </div>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-              <Plus className="w-4 h-4" />
-              새 문서 업로드
-            </button>
+            <div className="flex items-center gap-4">
+              <LanguageSwitcher />
+              <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                <Plus className="w-4 h-4" />
+                {t.uploadDocument}
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -138,7 +155,7 @@ export default function DocumentsPage() {
                         ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {doc.status}
+                      {getStatusText(doc.status)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

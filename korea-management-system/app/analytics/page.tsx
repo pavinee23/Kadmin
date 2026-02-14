@@ -2,22 +2,35 @@
 
 import { BarChart3, TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users as UsersIcon } from 'lucide-react';
 import Link from 'next/link';
+import { useLocale } from '@/lib/LocaleContext';
+import { translations } from '@/lib/translations';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function AnalyticsPage() {
+  const { locale } = useLocale();
+  const t = translations[locale];
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-gray-600 hover:text-gray-900">
-              ← 뒤로
-            </Link>
-            <div className="flex items-center gap-2">
-              <BarChart3 className="w-6 h-6 text-purple-600" />
-              <h1 className="text-2xl font-bold text-gray-900">통계 및 분석</h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link href="/" className="text-gray-600 hover:text-gray-900">
+                {t.back}
+              </Link>
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-6 h-6 text-purple-600" />
+                <h1 className="text-2xl font-bold text-gray-900">{t.statisticsAndAnalytics}</h1>
+              </div>
             </div>
+            <LanguageSwitcher />
           </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         </div>
       </header>
 
@@ -35,7 +48,7 @@ export default function AnalyticsPage() {
               </span>
             </div>
             <div className="text-2xl font-bold text-gray-900 mb-1">₩45.2억</div>
-            <div className="text-sm text-gray-600">총 매출</div>
+            <div className="text-sm text-gray-600">{t.totalRevenue}</div>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-6">
@@ -49,7 +62,7 @@ export default function AnalyticsPage() {
               </span>
             </div>
             <div className="text-2xl font-bold text-gray-900 mb-1">2,847</div>
-            <div className="text-sm text-gray-600">주문 수</div>
+            <div className="text-sm text-gray-600">{t.orderCount}</div>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-6">
@@ -63,7 +76,7 @@ export default function AnalyticsPage() {
               </span>
             </div>
             <div className="text-2xl font-bold text-gray-900 mb-1">18,234</div>
-            <div className="text-sm text-gray-600">활성 사용자</div>
+            <div className="text-sm text-gray-600">{t.activeUsers}</div>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-6">
@@ -77,14 +90,14 @@ export default function AnalyticsPage() {
               </span>
             </div>
             <div className="text-2xl font-bold text-gray-900 mb-1">67.8%</div>
-            <div className="text-sm text-gray-600">전환율</div>
+            <div className="text-sm text-gray-600">{t.conversionRate}</div>
           </div>
         </div>
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">월별 매출 추이</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t.monthlyRevenueTrend}</h3>
             <div className="h-64 flex items-end justify-between gap-2">
               {[65, 75, 85, 70, 90, 95, 88, 92, 87, 94, 98, 100].map((height, index) => (
                 <div key={index} className="flex-1 bg-purple-100 hover:bg-purple-200 rounded-t transition-colors relative group">

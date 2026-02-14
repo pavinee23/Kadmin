@@ -1,54 +1,89 @@
 'use client';
 
-import { Home, Users, FileText, BarChart3, Settings, Bell, MapPin, Package } from 'lucide-react';
+import { Home, Users, FileText, BarChart3, Settings, Bell, MapPin, Package, Headphones, Wrench, Briefcase, FlaskConical } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useLocale } from '@/lib/LocaleContext';
+import { translations } from '@/lib/translations';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import CountryFlag from '@/components/CountryFlag';
+import CompanyLogo from '@/components/CompanyLogo';
 
 export default function HomePage() {
   const pathname = usePathname();
+  const { locale } = useLocale();
+  const t = translations[locale];
 
   const features = [
     { 
+      icon: Briefcase, 
+      title: t.executiveDepartment,
+      description: t.executiveDepartmentDesc,
+      href: '/login/executive',
+      color: 'bg-slate-700'
+    },
+    { 
       icon: Users, 
-      title: '사용자 관리',
-      description: '직원 및 사용자 계정 관리',
-      href: '/users',
+      title: t.userManagement,
+      description: t.userManagementDesc,
+      href: '/login/hr',
       color: 'bg-blue-500'
     },
     { 
       icon: FileText, 
-      title: '문서 관리',
-      description: '문서 및 보고서 관리 시스템',
-      href: '/documents',
+      title: t.documentManagement,
+      description: t.documentManagementDesc,
+      href: '/login/production',
       color: 'bg-green-500'
     },
     { 
       icon: BarChart3, 
-      title: '통계 및 분석',
-      description: '데이터 분석 및 리포팅',
-      href: '/analytics',
+      title: t.statisticsAnalytics,
+      description: t.statisticsAnalyticsDesc,
+      href: '/login/international-market',
       color: 'bg-purple-500'
     },
     { 
       icon: Package, 
-      title: '재고 관리',
-      description: '제품 및 재고 추적',
-      href: '/inventory',
+      title: t.inventoryManagement,
+      description: t.inventoryManagementDesc,
+      href: '/login/domestic-market',
       color: 'bg-orange-500'
     },
     { 
       icon: MapPin, 
-      title: '위치 관리',
-      description: '지점 및 위치 정보',
-      href: '/locations',
+      title: t.locationManagement,
+      description: t.locationManagementDesc,
+      href: '/login/logistics',
       color: 'bg-red-500'
     },
     { 
       icon: Bell, 
-      title: '알림 센터',
-      description: '시스템 알림 및 공지사항',
-      href: '/notifications',
+      title: t.notificationCenter,
+      description: t.notificationCenterDesc,
+      href: '/login/quality-control',
       color: 'bg-yellow-500'
+    },
+    { 
+      icon: Headphones, 
+      title: t.afterSalesServiceDepartment,
+      description: t.afterSalesServiceDepartmentDesc,
+      href: '/login/after-sales',
+      color: 'bg-teal-500'
+    },
+    { 
+      icon: Wrench, 
+      title: t.maintenanceDepartment,
+      description: t.maintenanceDepartmentDesc,
+      href: '/login/maintenance',
+      color: 'bg-indigo-500'
+    },
+    { 
+      icon: FlaskConical, 
+      title: t.researchDevelopmentDepartment,
+      description: t.researchDevelopmentDepartmentDesc,
+      href: '/login/research-development',
+      color: 'bg-cyan-500'
     },
   ];
 
@@ -58,16 +93,26 @@ export default function HomePage() {
       <header className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
-                <Home className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Korea Management System</h1>
-                <p className="text-sm text-gray-500">한국 관리 시스템</p>
+            <div className="flex items-center gap-4">
+              {/* Company Logo */}
+              <CompanyLogo size="md" />
+              
+              {/* Company & System Info */}
+              <div className="border-l-2 border-gray-200 pl-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <h1 className="text-xl font-bold text-blue-600">{t.companyName}</h1>
+                  <CountryFlag country="KR" size="sm" />
+                </div>
+                <p className="text-xs text-gray-500 mb-1">{t.companySlogan}</p>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-gray-700">{t.systemName}</h2>
+                  <span className="text-xs text-gray-400">|</span>
+                  <span className="text-xs text-gray-500">{t.systemNameSub}</span>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-4">
+              <LanguageSwitcher />
               <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                 <Bell className="w-5 h-5 text-gray-600" />
               </button>
@@ -79,7 +124,9 @@ export default function HomePage() {
               </Link>
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-semibold text-sm">관리</span>
+                  <span className="text-white font-semibold text-sm">
+                    {locale === 'ko' ? '관리' : 'AD'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -91,14 +138,19 @@ export default function HomePage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Welcome Section */}
         <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">환영합니다!</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">{t.welcome}</h2>
           <p className="text-lg text-gray-600">
-            Korea Management System에 오신 것을 환영합니다. 아래에서 원하시는 기능을 선택하세요.
+            {t.welcomeMessage}
           </p>
         </div>
 
+        {/* Departments Section */}
+        <div className="mb-8">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6">{t.departments}</h3>
+        </div>
+
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {features.map((feature, index) => (
             <Link
               key={index}
@@ -115,25 +167,188 @@ export default function HomePage() {
         </div>
 
         {/* Stats Section */}
-        <div className="bg-white rounded-xl shadow-md p-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">시스템 개요</h3>
+        <div className="bg-white rounded-xl shadow-md p-8 mb-8">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6">{t.systemOverview}</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-1">247</div>
-              <div className="text-sm text-gray-600">총 사용자</div>
+            {/* Total Employees */}
+            <div className="text-center bg-blue-50 rounded-lg p-4">
+              <div className="text-3xl font-bold text-blue-600 mb-1">341</div>
+              <div className="text-sm text-gray-600 font-medium">{t.totalEmployees}</div>
+              <div className="text-xs text-gray-500 mt-1 flex items-center justify-center gap-1">
+                <CountryFlag country="KR" size="sm" /> 156 •
+                <CountryFlag country="BN" size="sm" /> 45 •
+                <CountryFlag country="TH" size="sm" /> 78 •
+                <CountryFlag country="VN" size="sm" /> 62
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-1">1,453</div>
-              <div className="text-sm text-gray-600">문서 수</div>
+            
+            {/* Top Profit Branches */}
+            <div className="text-center bg-green-50 rounded-lg p-4">
+              <div className="text-sm text-gray-600 font-medium mb-2">{t.topProfitBranches}</div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-center gap-2">
+                  <CountryFlag country="KR" size="md" />
+                  <span className="text-lg font-bold text-green-600">
+                    ₩{new Intl.NumberFormat(locale === 'ko' ? 'ko-KR' : 'en-US', { 
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0
+                    }).format(42180000000)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <CountryFlag country="TH" size="md" />
+                  <span className="text-lg font-bold text-green-600">
+                    ฿{new Intl.NumberFormat(locale === 'ko' ? 'ko-KR' : 'en-US', { 
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0
+                    }).format(67320000)}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600 mb-1">89</div>
-              <div className="text-sm text-gray-600">활성 프로젝트</div>
+            
+            {/* Top Expense Branches */}
+            <div className="text-center bg-orange-50 rounded-lg p-4">
+              <div className="text-sm text-gray-600 font-medium mb-2">{t.topExpenseBranches}</div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-center gap-2">
+                  <CountryFlag country="KR" size="md" />
+                  <span className="text-lg font-bold text-orange-600">
+                    ₩{new Intl.NumberFormat(locale === 'ko' ? 'ko-KR' : 'en-US', { 
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0
+                    }).format(116240000000)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <CountryFlag country="VN" size="md" />
+                  <span className="text-lg font-bold text-orange-600">
+                    ₫{new Intl.NumberFormat(locale === 'ko' ? 'ko-KR' : 'en-US', { 
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0
+                    }).format(62230000000)}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-orange-600 mb-1">12</div>
-              <div className="text-sm text-gray-600">지점</div>
+            
+            {/* Total Branches */}
+            <div className="text-center bg-purple-50 rounded-lg p-4">
+              <div className="text-3xl font-bold text-purple-600 mb-1">4</div>
+              <div className="text-sm text-gray-600 font-medium">{t.totalBranches}</div>
+              <div className="text-xs text-gray-500 mt-1 flex items-center justify-center gap-1">
+                <CountryFlag country="KR" size="sm" />
+                <CountryFlag country="BN" size="sm" />
+                <CountryFlag country="TH" size="sm" />
+                <CountryFlag country="VN" size="sm" />
+              </div>
             </div>
+          </div>
+        </div>
+
+        {/* International Branches Section */}
+        <div className="bg-white rounded-xl shadow-md p-8">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6">{t.internationalBranches}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Korea Branch (HQ) */}
+            <Link href="/branches/korea" className="border border-gray-200 rounded-lg p-6 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer group">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="group-hover:scale-110 transition-transform">
+                  <CountryFlag country="KR" size="xl" />
+                </div>
+                <div>
+                  <h4 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{t.korea}</h4>
+                  <p className="text-sm text-gray-500">Korea</p>
+                </div>
+              </div>
+              <div className="space-y-3 mb-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">{t.employees}:</span>
+                  <span className="font-semibold text-gray-900">156</span>
+                </div>
+                <div className="h-px bg-gray-200"></div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">{t.lastUpdate}:</p>
+                  <p className="text-sm text-gray-700">{t.koreaUpdate}</p>
+                </div>
+              </div>
+              <div className="text-xs text-gray-400">1 {t.dayAgo}</div>
+            </Link>
+
+            {/* Brunei Branch */}
+            <Link href="/branches/brunei" className="border border-gray-200 rounded-lg p-6 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer group">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="group-hover:scale-110 transition-transform">
+                  <CountryFlag country="BN" size="xl" />
+                </div>
+                <div>
+                  <h4 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{t.brunei}</h4>
+                  <p className="text-sm text-gray-500">Brunei Darussalam</p>
+                </div>
+              </div>
+              <div className="space-y-3 mb-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">{t.employees}:</span>
+                  <span className="font-semibold text-gray-900">45</span>
+                </div>
+                <div className="h-px bg-gray-200"></div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">{t.lastUpdate}:</p>
+                  <p className="text-sm text-gray-700">{t.bruneiUpdate}</p>
+                </div>
+              </div>
+              <div className="text-xs text-gray-400">2 {t.daysAgo}</div>
+            </Link>
+
+            {/* Thailand Branch */}
+            <Link href="/branches/thailand" className="border border-gray-200 rounded-lg p-6 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer group">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="group-hover:scale-110 transition-transform">
+                  <CountryFlag country="TH" size="xl" />
+                </div>
+                <div>
+                  <h4 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{t.thailand}</h4>
+                  <p className="text-sm text-gray-500">Thailand</p>
+                </div>
+              </div>
+              <div className="space-y-3 mb-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">{t.employees}:</span>
+                  <span className="font-semibold text-gray-900">78</span>
+                </div>
+                <div className="h-px bg-gray-200"></div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">{t.lastUpdate}:</p>
+                  <p className="text-sm text-gray-700">{t.thailandUpdate}</p>
+                </div>
+              </div>
+              <div className="text-xs text-gray-400">5 {t.daysAgo}</div>
+            </Link>
+
+            {/* Vietnam Branch */}
+            <Link href="/branches/vietnam" className="border border-gray-200 rounded-lg p-6 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer group">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="group-hover:scale-110 transition-transform">
+                  <CountryFlag country="VN" size="xl" />
+                </div>
+                <div>
+                  <h4 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{t.vietnam}</h4>
+                  <p className="text-sm text-gray-500">Vietnam</p>
+                </div>
+              </div>
+              <div className="space-y-3 mb-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">{t.employees}:</span>
+                  <span className="font-semibold text-gray-900">62</span>
+                </div>
+                <div className="h-px bg-gray-200"></div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">{t.lastUpdate}:</p>
+                  <p className="text-sm text-gray-700">{t.vietnamUpdate}</p>
+                </div>
+              </div>
+              <div className="text-xs text-gray-400">1 {t.weekAgo}</div>
+            </Link>
           </div>
         </div>
       </main>
@@ -142,7 +357,7 @@ export default function HomePage() {
       <footer className="bg-white border-t border-gray-200 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <p className="text-center text-gray-600 text-sm">
-            © 2026 Korea Management System. All rights reserved.
+            {t.copyright}
           </p>
         </div>
       </footer>

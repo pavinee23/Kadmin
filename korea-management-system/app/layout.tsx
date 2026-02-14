@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { LocaleProvider } from '@/lib/LocaleContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,8 +17,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
+      <head>
+        <meta charSet="utf-8" />
+      </head>
       <body className={inter.className}>
-        {children}
+        <LocaleProvider>
+          {children}
+        </LocaleProvider>
       </body>
     </html>
   )

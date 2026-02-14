@@ -2,21 +2,30 @@
 
 import { Settings as SettingsIcon, User, Bell, Lock, Globe, Palette, Database, Shield } from 'lucide-react';
 import Link from 'next/link';
+import { useLocale } from '@/lib/LocaleContext';
+import { translations } from '@/lib/translations';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function SettingsPage() {
+  const { locale } = useLocale();
+  const t = translations[locale];
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-gray-600 hover:text-gray-900">
-              ← 뒤로
-            </Link>
-            <div className="flex items-center gap-2">
-              <SettingsIcon className="w-6 h-6 text-gray-600" />
-              <h1 className="text-2xl font-bold text-gray-900">시스템 설정</h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link href="/" className="text-gray-600 hover:text-gray-900">
+                {t.back}
+              </Link>
+              <div className="flex items-center gap-2">
+                <SettingsIcon className="w-6 h-6 text-gray-600" />
+                <h1 className="text-2xl font-bold text-gray-900">{t.systemSettings}</h1>
+              </div>
             </div>
+            <LanguageSwitcher />
           </div>
         </div>
       </header>
@@ -28,13 +37,13 @@ export default function SettingsPage() {
             <div className="bg-white rounded-lg shadow-sm p-4">
               <nav className="space-y-1">
                 {[
-                  { icon: User, label: '프로필 설정', active: true },
-                  { icon: Bell, label: '알림 설정', active: false },
-                  { icon: Lock, label: '보안 설정', active: false },
-                  { icon: Globe, label: '언어 및 지역', active: false },
-                  { icon: Palette, label: '테마 설정', active: false },
-                  { icon: Database, label: '데이터 관리', active: false },
-                  { icon: Shield, label: '개인정보 보호', active: false },
+                  { icon: User, label: t.profileSettings, active: true },
+                  { icon: Bell, label: t.notificationSettings, active: false },
+                  { icon: Lock, label: t.securitySettings, active: false },
+                  { icon: Globe, label: t.languageRegion, active: false },
+                  { icon: Palette, label: t.themeSettings, active: false },
+                  { icon: Database, label: t.dataManagement, active: false },
+                  { icon: Shield, label: t.privacySettings, active: false },
                 ].map((item, index) => (
                   <button
                     key={index}

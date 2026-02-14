@@ -3,8 +3,13 @@
 import { Users, Search, Plus, Edit, Trash2, Mail, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useLocale } from '@/lib/LocaleContext';
+import { translations } from '@/lib/translations';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function UsersPage() {
+  const { locale } = useLocale();
+  const t = translations[locale];
   const [searchQuery, setSearchQuery] = useState('');
 
   const users = [
@@ -23,17 +28,20 @@ export default function UsersPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Link href="/" className="text-gray-600 hover:text-gray-900">
-                ← 뒤로
+                {t.back}
               </Link>
               <div className="flex items-center gap-2">
                 <Users className="w-6 h-6 text-blue-600" />
-                <h1 className="text-2xl font-bold text-gray-900">사용자 관리</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t.userManagementTitle}</h1>
               </div>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              <Plus className="w-4 h-4" />
-              새 사용자 추가
-            </button>
+            <div className="flex items-center gap-4">
+              <LanguageSwitcher />
+              <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <Plus className="w-4 h-4" />
+                {t.addNewUser}
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -46,7 +54,7 @@ export default function UsersPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="이름, 이메일, 전화번호로 검색..."
+                placeholder={t.searchByNameEmailPhone}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -126,7 +134,7 @@ export default function UsersPage() {
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {user.status === 'active' ? '활성' : '비활성'}
+                      {user.status === 'active' ? t.active : t.inactive}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
