@@ -39,6 +39,41 @@ export default function DomesticSalesApprovalsPage() {
     ? [{ key: 'seoul', name: '서울/경기' }, { key: 'busan', name: '부산/경남' }, { key: 'daegu', name: '대구/경북' }, { key: 'daejeon', name: '대전/충청' }, { key: 'gwangju', name: '광주/전라' }, { key: 'incheon', name: '인천/강원' }, { key: 'jeju', name: '제주' }]
     : [{ key: 'seoul', name: 'Seoul/Gyeonggi' }, { key: 'busan', name: 'Busan/Gyeongnam' }, { key: 'daegu', name: 'Daegu/Gyeongbuk' }, { key: 'daejeon', name: 'Daejeon/Chungcheong' }, { key: 'gwangju', name: 'Gwangju/Jeolla' }, { key: 'incheon', name: 'Incheon/Gangwon' }, { key: 'jeju', name: 'Jeju' }];
 
+  // Customer data
+  const customers = [
+    { id: 1, name: 'Kim Minjun', company: '삼성전자', phone: '010-1234-5678', region: 'seoul' },
+    { id: 2, name: 'Choi Donghyun', company: 'LG에너지솔루션', phone: '010-2345-6789', region: 'busan' },
+    { id: 3, name: 'Son Heungmin', company: '현대자동차', phone: '010-3456-7890', region: 'daejeon' },
+    { id: 4, name: 'Hwang Heemin', company: 'SK하이닉스', phone: '010-4567-8901', region: 'gwangju' },
+    { id: 5, name: 'Jung Wooyoung', company: '포스코', phone: '010-5678-9012', region: 'seoul' },
+    { id: 6, name: 'Bae Suzy', company: 'NAVER', phone: '010-6789-0123', region: 'daegu' },
+    { id: 7, name: 'Lee Seunghyun', company: '카카오', phone: '010-7890-1234', region: 'incheon' },
+    { id: 8, name: 'Ko Changseok', company: '제주항공', phone: '010-8901-2345', region: 'jeju' }
+  ];
+
+  // Dealer data
+  const dealers = [
+    { id: 1, name: 'GreenTech Solutions', contact: 'Park Jihye', phone: '02-1234-5678', region: 'seoul', type: 'wholesale' },
+    { id: 2, name: 'EcoFriendly Systems', contact: 'Lee Kangin', phone: '051-2345-6789', region: 'busan', type: 'retail' },
+    { id: 3, name: 'Solar Plus Korea', contact: 'Kim Yeji', phone: '042-3456-7890', region: 'daejeon', type: 'installation' },
+    { id: 4, name: 'Energy Future Co.', contact: 'Choi Yuna', phone: '062-4567-8901', region: 'gwangju', type: 'distribution' },
+    { id: 5, name: 'Smart Energy Hub', contact: 'Park Seonjin', phone: '02-5678-9012', region: 'seoul', type: 'wholesale' },
+    { id: 6, name: 'Renewable Power Ltd.', contact: 'Kim Minjun', phone: '053-6789-0123', region: 'daegu', type: 'retail' }
+  ];
+
+  // Product data
+  const products = [
+    { id: 1, name: 'K-Energy Solar Panel 500W', price: 1800000, category: 'Solar', unit: 'ea' },
+    { id: 2, name: 'Smart Inverter SI-3000', price: 1850000, category: 'Inverter', unit: 'ea' },
+    { id: 3, name: 'Battery Storage BS-500', price: 3500000, category: 'Storage', unit: 'ea' },
+    { id: 4, name: 'LED Lighting Module LM-100', price: 90000, category: 'Lighting', unit: 'ea' },
+    { id: 5, name: 'EV Charger EC-300', price: 2400000, category: 'Charger', unit: 'ea' },
+    { id: 6, name: 'Power Monitoring System PMS', price: 2500000, category: 'Monitoring', unit: 'ea' },
+    { id: 7, name: 'Solar Controller SC-200', price: 450000, category: 'Controller', unit: 'ea' },
+    { id: 8, name: 'Transformer T-5000', price: 90000000, category: 'Transformer', unit: 'ea' },
+    { id: 9, name: 'Energy Audit Kit EAK-1', price: 900000, category: 'Audit', unit: 'set' }
+  ];
+
   const [items, setItems] = useState<SalesApproval[]>([
     { id: 1, approvalNumber: 'DSA-2026-001', region: 'seoul', productName: 'K-Energy Solar Panel 500W', quantity: 300, amount: 540000000, requestedBy: 'Kim Minjun', approvedBy: 'Park Jihye', approvalDate: '2026-02-15', status: 'approved', remarks: '강남구 대형 빌딩 옥상 설치 프로젝트' },
     { id: 2, approvalNumber: 'DSA-2026-002', region: 'busan', productName: 'Smart Inverter SI-3000', quantity: 150, amount: 277500000, requestedBy: 'Choi Donghyun', approvedBy: '-', approvalDate: '2026-02-14', status: 'pending', remarks: '해운대 신축 아파트 단지 설치' },
@@ -52,7 +87,18 @@ export default function DomesticSalesApprovalsPage() {
     { id: 10, approvalNumber: 'DSA-2026-010', region: 'seoul', productName: 'Energy Audit Kit EAK-1', quantity: 30, amount: 27000000, requestedBy: 'Yoo Jaesung', approvedBy: 'Kim Minjun', approvalDate: '2026-02-06', status: 'approved', remarks: '서울시 에너지 감사 장비 공급' },
   ]);
 
-  const [newItem, setNewItem] = useState({ region: 'seoul', productName: '', quantity: 0, amount: 0, requestedBy: '', remarks: '' });
+  const [newItem, setNewItem] = useState({ 
+    region: 'seoul', 
+    customerId: '', 
+    dealerId: '', 
+    productId: '', 
+    productName: '', 
+    quantity: 1, 
+    unitPrice: 0,
+    amount: 0, 
+    requestedBy: '', 
+    remarks: '' 
+  });
   const [newCustomer, setNewCustomer] = useState({ name: '', companyName: '', email: '', phone: '', address: '', region: 'seoul', contactPerson: '', notes: '' });
   const [newDealer, setNewDealer] = useState({ dealerName: '', companyName: '', email: '', phone: '', address: '', region: 'seoul', contactPerson: '', businessType: '', notes: '' });
 
@@ -384,22 +430,72 @@ export default function DomesticSalesApprovalsPage() {
   };
 
   const handleCreate = () => {
+    const selectedCustomer = customers.find(c => c.id === Number(newItem.customerId));
+    const selectedDealer = dealers.find(d => d.id === Number(newItem.dealerId));
+    const selectedProduct = products.find(p => p.id === Number(newItem.productId));
+    
     const newId = Math.max(...items.map(o => o.id)) + 1;
     setItems([...items, {
       id: newId,
       approvalNumber: `DSA-2026-${String(newId).padStart(3, '0')}`,
       region: newItem.region,
-      productName: newItem.productName,
+      productName: selectedProduct?.name || newItem.productName,
       quantity: newItem.quantity,
       amount: newItem.amount,
-      requestedBy: newItem.requestedBy,
+      requestedBy: selectedCustomer?.name || newItem.requestedBy,
       approvedBy: '-',
       approvalDate: '2026-02-15',
       status: 'pending',
-      remarks: newItem.remarks,
+      remarks: `${locale === 'ko' ? '고객' : 'Customer'}: ${selectedCustomer?.company || 'N/A'}, ${locale === 'ko' ? '딜러' : 'Dealer'}: ${selectedDealer?.name || 'N/A'}${newItem.remarks ? ` - ${newItem.remarks}` : ''}`,
     }]);
     setIsAddModalOpen(false);
-    setNewItem({ region: 'seoul', productName: '', quantity: 0, amount: 0, requestedBy: '', remarks: '' });
+    setNewItem({ 
+      region: 'seoul', 
+      customerId: '', 
+      dealerId: '', 
+      productId: '', 
+      productName: '', 
+      quantity: 1, 
+      unitPrice: 0,
+      amount: 0, 
+      requestedBy: '', 
+      remarks: '' 
+    });
+  };
+
+  const handleProductChange = (productId: string) => {
+    const selectedProduct = products.find(p => p.id === Number(productId));
+    if (selectedProduct) {
+      const amount = selectedProduct.price * newItem.quantity;
+      setNewItem({
+        ...newItem,
+        productId,
+        productName: selectedProduct.name,
+        unitPrice: selectedProduct.price,
+        amount
+      });
+    }
+  };
+
+  const handleQuantityChange = (quantity: number) => {
+    const amount = newItem.unitPrice * quantity;
+    setNewItem({
+      ...newItem,
+      quantity,
+      amount
+    });
+  };
+
+  const handleCustomerChange = (customerId: string) => {
+    const selectedCustomer = customers.find(c => c.id === Number(customerId));
+    if (selectedCustomer) {
+      setNewItem({
+        ...newItem,
+        customerId,
+        requestedBy: selectedCustomer.name,
+        region: selectedCustomer.region
+      });
+    }
   };
 
   const handleCreateCustomer = () => {
@@ -554,42 +650,140 @@ export default function DomesticSalesApprovalsPage() {
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b">
-              <h2 className="text-lg font-bold">{t.addNew} - {t.salesApprovals}</h2>
+            <div className="flex items-center justify-between p-6 border-b bg-blue-50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                  <Plus className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-lg font-bold text-blue-800">{t.addNew} - {t.salesApprovals}</h2>
+              </div>
               <button onClick={() => setIsAddModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-6 space-y-4">
+              
+              {/* Customer Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '고객' : 'Customer'}</label>
+                <select 
+                  value={newItem.customerId} 
+                  onChange={(e) => handleCustomerChange(e.target.value)} 
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">{locale === 'ko' ? '고객을 선택하세요' : 'Select Customer'}</option>
+                  {customers.map((customer) => (
+                    <option key={customer.id} value={customer.id}>
+                      {customer.name} - {customer.company} ({customer.phone})
+                    </option>
+                  ))}
+                </select>
+                {/* Manual customer input if no selection */}
+                {!newItem.customerId && (
+                  <input
+                    type="text"
+                    placeholder={locale === 'ko' ? '또는 고객명을 직접 입력' : 'Or enter customer name manually'}
+                    value={newItem.requestedBy}
+                    onChange={(e) => setNewItem({...newItem, requestedBy: e.target.value})}
+                    className="w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                )}
+              </div>
+
+              {/* Dealer Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '딜러' : 'Dealer'}</label>
+                <select 
+                  value={newItem.dealerId} 
+                  onChange={(e) => setNewItem({...newItem, dealerId: e.target.value})} 
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">{locale === 'ko' ? '딜러를 선택하세요 (선택사항)' : 'Select Dealer (Optional)'}</option>
+                  {dealers.map((dealer) => (
+                    <option key={dealer.id} value={dealer.id}>
+                      {dealer.name} - {dealer.contact} ({dealer.type})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              {/* Region */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t.region}</label>
-                <select value={newItem.region} onChange={e => setNewItem({ ...newItem, region: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2">
+                <select value={newItem.region} onChange={e => setNewItem({ ...newItem, region: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                   {regions.map(r => <option key={r.key} value={r.key}>{r.name}</option>)}
                 </select>
               </div>
+
+              {/* Product Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t.productName}</label>
-                <input type="text" value={newItem.productName} onChange={e => setNewItem({ ...newItem, productName: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+                <select 
+                  value={newItem.productId} 
+                  onChange={(e) => handleProductChange(e.target.value)} 
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">{locale === 'ko' ? '제품을 선택하세요' : 'Select Product'}</option>
+                  {products.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.name} - ₩{product.price.toLocaleString()} ({product.unit})
+                    </option>
+                  ))}
+                </select>
+                {/* Manual product input if no selection */}
+                {!newItem.productId && (
+                  <input
+                    type="text"
+                    placeholder={locale === 'ko' ? '또는 제품명을 직접 입력' : 'Or enter product name manually'}
+                    value={newItem.productName}
+                    onChange={(e) => setNewItem({...newItem, productName: e.target.value})}
+                    className="w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                )}
               </div>
+
+              {/* Quantity and Unit Price */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{t.quantity}</label>
-                  <input type="number" value={newItem.quantity} onChange={e => setNewItem({ ...newItem, quantity: Number(e.target.value) })} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+                  <input type="number" min="1" value={newItem.quantity} onChange={e => handleQuantityChange(Number(e.target.value))} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t.amount}</label>
-                  <input type="number" value={newItem.amount} onChange={e => setNewItem({ ...newItem, amount: Number(e.target.value) })} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-                </div>
+                {newItem.unitPrice > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '단가' : 'Unit Price'}</label>
+                    <input type="text" value={`₩${newItem.unitPrice.toLocaleString()}`} readOnly className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-100" />
+                  </div>
+                )}
               </div>
+
+              {/* Total Amount */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t.requestedBy}</label>
-                <input type="text" value={newItem.requestedBy} onChange={e => setNewItem({ ...newItem, requestedBy: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.amount}</label>
+                <input 
+                  type="number" 
+                  value={newItem.amount} 
+                  onChange={e => setNewItem({ ...newItem, amount: Number(e.target.value) })} 
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                  readOnly={newItem.unitPrice > 0}
+                />
+                {newItem.amount > 0 && (
+                  <p className="text-sm text-gray-600 mt-1">₩{newItem.amount.toLocaleString()}</p>
+                )}
               </div>
+
+              {/* Remarks */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t.remarks}</label>
-                <textarea value={newItem.remarks} onChange={e => setNewItem({ ...newItem, remarks: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2" rows={3} />
+                <textarea value={newItem.remarks} onChange={e => setNewItem({ ...newItem, remarks: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows={3} placeholder={locale === 'ko' ? '추가 정보나 특별 요청사항을 입력하세요...' : 'Enter additional information or special requests...'} />
               </div>
-              <div className="flex gap-2 pt-2">
-                <button onClick={() => setIsAddModalOpen(false)} className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">{t.cancel}</button>
-                <button onClick={handleCreate} className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">{t.save}</button>
+
+              <div className="flex gap-2 pt-4 border-t">
+                <button onClick={() => setIsAddModalOpen(false)} className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 font-medium">{t.cancel}</button>
+                <button 
+                  onClick={handleCreate} 
+                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed" 
+                  disabled={(!newItem.productId && !newItem.productName) || newItem.quantity === 0 || newItem.amount === 0 || (!newItem.customerId && !newItem.requestedBy)}
+                >
+                  {t.save}
+                </button>
               </div>
             </div>
           </div>

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from '@/lib/LocaleContext';
 import { translations } from '@/lib/translations';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { ArrowLeft, Receipt, Plus, Search, Eye, Trash2, X, Printer } from 'lucide-react';
+import { ArrowLeft, Receipt, Plus, Search, Eye, Trash2, X, Printer, CreditCard, Calendar, DollarSign } from 'lucide-react';
 
 interface Invoice {
   id: number;
@@ -77,16 +77,26 @@ export default function TaxInvoicesPage() {
 
   const [newInvoice, setNewInvoice] = useState({
     invoiceId: '', invoiceNumber: '', customer: '', businessNumber: '', issueDate: '2026-02-15', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, type: 'sales' as 'sales' | 'purchase',
+    // Payment Information
+    paymentReceived: 0,
+    paymentDate: '',
+    paymentMethod: 'bank_transfer',
+    paymentStatus: 'pending',
+    remainingAmount: 0
   });
 
   const handleInvoiceSelect = (invoiceId: string) => {
     if (!invoiceId) {
-      setNewInvoice({ invoiceId: '', invoiceNumber: '', customer: '', businessNumber: '', issueDate: '2026-02-15', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, type: 'sales' });
+      setNewInvoice({ 
+        invoiceId: '', invoiceNumber: '', customer: '', businessNumber: '', issueDate: '2026-02-15', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, type: 'sales',
+        paymentReceived: 0, paymentDate: '', paymentMethod: 'bank_transfer', paymentStatus: 'pending', remainingAmount: 0
+      });
       return;
     }
     const selectedInv = availableInvoices.find(inv => inv.id === Number(invoiceId));
     if (selectedInv) {
       const firstItem = selectedInv.items[0];
+      const totalAmount = selectedInv.totalAmount;
       setNewInvoice({
         invoiceId,
         invoiceNumber: selectedInv.invoiceNumber,
@@ -98,6 +108,11 @@ export default function TaxInvoicesPage() {
         unit: firstItem.unit,
         unitPrice: firstItem.unitPrice,
         type: 'sales',
+        paymentReceived: 0,
+        paymentDate: '',
+        paymentMethod: 'bank_transfer',
+        paymentStatus: 'pending',
+        remainingAmount: totalAmount
       });
     }
   };
@@ -144,12 +159,15 @@ export default function TaxInvoicesPage() {
       taxAmount,
       totalAmount: supplyAmount + taxAmount,
       items: [{ name: newInvoice.itemName, quantity: newInvoice.quantity, unit: newInvoice.unit, unitPrice: newInvoice.unitPrice }],
-      paymentStatus: 'unpaid',
+      paymentStatus: newInvoice.paymentStatus as 'paid' | 'unpaid' | 'partial' | 'overdue',
       type: newInvoice.type,
       invoiceNumber: newInvoice.invoiceNumber,
     }]);
     setIsAddModalOpen(false);
-    setNewInvoice({ invoiceId: '', invoiceNumber: '', customer: '', businessNumber: '', issueDate: '2026-02-15', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, type: 'sales' });
+    setNewInvoice({ 
+      invoiceId: '', invoiceNumber: '', customer: '', businessNumber: '', issueDate: '2026-02-15', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, type: 'sales',
+      paymentReceived: 0, paymentDate: '', paymentMethod: 'bank_transfer', paymentStatus: 'pending', remainingAmount: 0
+    });
   };
 
   const handlePrint = (inv: TaxInvoice) => {
@@ -500,6 +518,104 @@ export default function TaxInvoicesPage() {
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.quantity}</label><input type="number" value={newInvoice.quantity} readOnly className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50" /></div>
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '단위' : 'Unit'}</label><input value={newInvoice.unit} readOnly className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50" /></div>
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.unitPrice}</label><input type="number" value={newInvoice.unitPrice} readOnly className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50" /></div>
+              </div>
+
+              {/* Payment Information Section */}
+              <div className="border-t pt-4">
+                <h4 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-green-500" />
+                  {locale === 'ko' ? '고객 결제 정보' : 'Customer Payment Information'}
+                </h4>
+                
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {locale === 'ko' ? '받은 금액' : 'Amount Received'}
+                    </label>
+                    <input 
+                      type="number" 
+                      value={newInvoice.paymentReceived} 
+                      onChange={(e) => {
+                        const received = Number(e.target.value);
+                        const totalAmount = newInvoice.quantity * newInvoice.unitPrice * 1.1; // Including tax
+                        const remaining = Math.max(0, totalAmount - received);
+                        const status = received >= totalAmount ? 'paid' : received > 0 ? 'partial' : 'pending';
+                        setNewInvoice({ 
+                          ...newInvoice, 
+                          paymentReceived: received, 
+                          remainingAmount: remaining,
+                          paymentStatus: status
+                        });
+                      }}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500" 
+                      placeholder="0"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {locale === 'ko' ? '결제일' : 'Payment Date'}
+                    </label>
+                    <input 
+                      type="date" 
+                      value={newInvoice.paymentDate} 
+                      onChange={(e) => setNewInvoice({ ...newInvoice, paymentDate: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500" 
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {locale === 'ko' ? '결제 방법' : 'Payment Method'}
+                    </label>
+                    <select 
+                      value={newInvoice.paymentMethod} 
+                      onChange={(e) => setNewInvoice({ ...newInvoice, paymentMethod: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500"
+                    >
+                      <option value="bank_transfer">{locale === 'ko' ? '계좌 이체' : 'Bank Transfer'}</option>
+                      <option value="credit_card">{locale === 'ko' ? '신용카드' : 'Credit Card'}</option>
+                      <option value="cash">{locale === 'ko' ? '현금' : 'Cash'}</option>
+                      <option value="check">{locale === 'ko' ? '수표' : 'Check'}</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {locale === 'ko' ? '결제 상태' : 'Payment Status'}
+                    </label>
+                    <select 
+                      value={newInvoice.paymentStatus} 
+                      onChange={(e) => setNewInvoice({ ...newInvoice, paymentStatus: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500"
+                    >
+                      <option value="pending">{locale === 'ko' ? '대기' : 'Pending'}</option>
+                      <option value="partial">{locale === 'ko' ? '부분 결제' : 'Partial'}</option>
+                      <option value="paid">{locale === 'ko' ? '완료' : 'Paid'}</option>
+                      <option value="overdue">{locale === 'ko' ? '연체' : 'Overdue'}</option>
+                    </select>
+                  </div>
+                </div>
+                
+                {/* Payment Summary */}
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-sm space-y-1">
+                    <div className="flex justify-between">
+                      <span>{locale === 'ko' ? '전체 금액:' : 'Total Amount:'}</span>
+                      <span className="font-medium">{formatCurrency(newInvoice.quantity * newInvoice.unitPrice * 1.1)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>{locale === 'ko' ? '받은 금액:' : 'Received:'}</span>
+                      <span className="font-medium text-green-600">{formatCurrency(newInvoice.paymentReceived)}</span>
+                    </div>
+                    <div className="flex justify-between border-t pt-1">
+                      <span>{locale === 'ko' ? '남은 금액:' : 'Remaining:'}</span>
+                      <span className="font-bold text-red-600">{formatCurrency(newInvoice.remainingAmount)}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">{t.cancel}</button>
