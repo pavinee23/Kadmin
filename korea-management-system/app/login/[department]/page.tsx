@@ -8,6 +8,7 @@ import { useLocale } from '@/lib/LocaleContext';
 import { translations } from '@/lib/translations';
 import CompanyLogo from '@/components/CompanyLogo';
 import CountryFlag from '@/components/CountryFlag';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 interface DepartmentConfig {
   name: string;
@@ -111,11 +112,11 @@ export default function DepartmentLoginPage({ params }: { params: { department: 
     // Simulate login process
     setTimeout(() => {
       if (username && password) {
-        // Redirect to department-specific dashboard or home
+        // Redirect to department-specific dashboard
         if (params.department === 'executive') {
           router.push('/executive');
         } else {
-          router.push('/');
+          router.push(`/${params.department}/dashboard`);
         }
       } else {
         setError(t.loginError);
@@ -127,14 +128,17 @@ export default function DepartmentLoginPage({ params }: { params: { department: 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Back to Home */}
+        {/* Language & Back */}
+        <div className="flex items-center justify-between mb-6">
         <Link 
           href="/"
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm">{t.backToHome}</span>
         </Link>
+          <LanguageSwitcher />
+        </div>
 
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">

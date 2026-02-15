@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, Users, FileText, BarChart3, Settings, Bell, MapPin, Package, Headphones, Wrench, Briefcase, FlaskConical } from 'lucide-react';
+import { Home, Users, FileText, BarChart3, Settings, Bell, MapPin, Package, Headphones, Wrench, Briefcase, FlaskConical, MessageCircle, Globe } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLocale } from '@/lib/LocaleContext';
@@ -24,43 +24,36 @@ export default function HomePage() {
     },
     { 
       icon: Users, 
-      title: t.userManagement,
-      description: t.userManagementDesc,
+      title: t.hrDepartment,
+      description: t.hrDepartmentDesc,
       href: '/login/hr',
       color: 'bg-blue-500'
     },
     { 
       icon: FileText, 
-      title: t.documentManagement,
-      description: t.documentManagementDesc,
+      title: t.productionDepartment,
+      description: t.productionDepartmentDesc,
       href: '/login/production',
       color: 'bg-green-500'
     },
     { 
       icon: BarChart3, 
-      title: t.statisticsAnalytics,
-      description: t.statisticsAnalyticsDesc,
+      title: t.internationalMarketDepartment,
+      description: t.internationalMarketDepartmentDesc,
       href: '/login/international-market',
       color: 'bg-purple-500'
     },
     { 
       icon: Package, 
-      title: t.inventoryManagement,
-      description: t.inventoryManagementDesc,
+      title: t.domesticMarketDepartment,
+      description: t.domesticMarketDepartmentDesc,
       href: '/login/domestic-market',
       color: 'bg-orange-500'
     },
     { 
-      icon: MapPin, 
-      title: t.locationManagement,
-      description: t.locationManagementDesc,
-      href: '/login/logistics',
-      color: 'bg-red-500'
-    },
-    { 
       icon: Bell, 
-      title: t.notificationCenter,
-      description: t.notificationCenterDesc,
+      title: t.qualityControlDepartment,
+      description: t.qualityControlDepartmentDesc,
       href: '/login/quality-control',
       color: 'bg-yellow-500'
     },
@@ -84,6 +77,41 @@ export default function HomePage() {
       description: t.researchDevelopmentDepartmentDesc,
       href: '/login/research-development',
       color: 'bg-cyan-500'
+    },
+    { 
+      icon: Globe, 
+      title: t.fileImageTranslator,
+      description: t.translatorDescription,
+      href: '/translator',
+      color: 'bg-violet-500'
+    },
+    { 
+      icon: MessageCircle, 
+      title: t.aiAssistant,
+      description: t.aiAssistantDesc,
+      href: '/ai-assistant',
+      color: 'bg-purple-500'
+    },
+    { 
+      icon: MessageCircle, 
+      title: t.bruneiChatRoomDepartment,
+      description: t.bruneiChatRoomDepartmentDesc,
+      href: '/chat/brunei-chat',
+      color: 'bg-amber-500'
+    },
+    { 
+      icon: MessageCircle, 
+      title: t.logisticsDepartment,
+      description: t.logisticsDepartmentDesc,
+      href: '/chat/thailand-chat',
+      color: 'bg-red-500'
+    },
+    { 
+      icon: MessageCircle, 
+      title: t.vietnamChatRoomDepartment,
+      description: t.vietnamChatRoomDepartmentDesc,
+      href: '/chat/vietnam-chat',
+      color: 'bg-emerald-500'
     },
   ];
 
@@ -150,7 +178,7 @@ export default function HomePage() {
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
           {features.map((feature, index) => (
             <Link
               key={index}
