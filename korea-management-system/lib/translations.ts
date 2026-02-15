@@ -500,6 +500,8 @@ export const translations = {
     marketing: '마케팅',
     other: '기타',
     addNew: '새로 추가',
+    newCustomer: '새 고객',
+    newDealer: '새 딜러',
     filter: '필터',
     noData: '데이터 없음',
 
@@ -1170,6 +1172,8 @@ export const translations = {
     marketing: 'Marketing',
     other: 'Other',
     addNew: 'Add New',
+    newCustomer: 'New Customer',
+    newDealer: 'New Dealer',
     filter: 'Filter',
     noData: 'No Data',
 

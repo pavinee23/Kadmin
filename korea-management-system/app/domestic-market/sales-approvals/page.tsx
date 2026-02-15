@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from '@/lib/LocaleContext';
 import { translations } from '@/lib/translations';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { ArrowLeft, ClipboardCheck, Plus, Eye, Trash2, X, Search as SearchIcon, Printer, FileDown } from 'lucide-react';
+import { ArrowLeft, ClipboardCheck, Plus, Eye, Trash2, X, Search as SearchIcon, Printer, FileDown, Users, Building2, FileText } from 'lucide-react';
 
 interface SalesApproval {
   id: number;
@@ -30,6 +30,10 @@ export default function DomesticSalesApprovalsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedItem, setSelectedItem] = useState<SalesApproval | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [isDealerModalOpen, setIsDealerModalOpen] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [previewItem, setPreviewItem] = useState<SalesApproval | null>(null);
 
   const regions = locale === 'ko'
     ? [{ key: 'seoul', name: '서울/경기' }, { key: 'busan', name: '부산/경남' }, { key: 'daegu', name: '대구/경북' }, { key: 'daejeon', name: '대전/충청' }, { key: 'gwangju', name: '광주/전라' }, { key: 'incheon', name: '인천/강원' }, { key: 'jeju', name: '제주' }]
@@ -49,6 +53,8 @@ export default function DomesticSalesApprovalsPage() {
   ]);
 
   const [newItem, setNewItem] = useState({ region: 'seoul', productName: '', quantity: 0, amount: 0, requestedBy: '', remarks: '' });
+  const [newCustomer, setNewCustomer] = useState({ name: '', companyName: '', email: '', phone: '', address: '', region: 'seoul', contactPerson: '', notes: '' });
+  const [newDealer, setNewDealer] = useState({ dealerName: '', companyName: '', email: '', phone: '', address: '', region: 'seoul', contactPerson: '', businessType: '', notes: '' });
 
   const formatCurrency = (v: number) => '₩' + new Intl.NumberFormat(locale === 'ko' ? 'ko-KR' : 'en-US').format(v);
 
@@ -71,6 +77,312 @@ export default function DomesticSalesApprovalsPage() {
     }
   };
 
+  const generateReportContent = (item: SalesApproval) => {
+    const currentDate = new Date().toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US');
+    const statusText = item.status === 'approved' ? (locale === 'ko' ? '승인됨' : 'Approved') :
+                      item.status === 'pending' ? (locale === 'ko' ? '대기중' : 'Pending') :
+                      (locale === 'ko' ? '거절됨' : 'Rejected');
+    
+    return {
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${t.salesApprovals} - ${item.approvalNumber}</title>
+            <meta charset="UTF-8">
+            <style>
+              @page { size: A4; margin: 0; }
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { 
+                font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
+                background: white; 
+                padding: 12mm; 
+                color: #1a1a1a; 
+              }
+              @media print {
+                body { padding: 8mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+              }
+              .container { 
+                background: white; 
+                max-width: 210mm; 
+                margin: 0 auto; 
+                padding: 18px; 
+              }
+              .header { 
+                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); 
+                padding: 16px; 
+                border-radius: 10px 10px 0 0; 
+                color: white; 
+                display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+              }
+              .logo-section { 
+                display: flex; 
+                align-items: center; 
+                gap: 12px; 
+              }
+              .logo { 
+                width: 60px; 
+                height: 60px; 
+                background: white; 
+                border-radius: 8px; 
+                padding: 8px; 
+                object-fit: contain; 
+                object-position: center; 
+              }
+              .company-name { 
+                font-size: 20px; 
+                font-weight: 900; 
+                letter-spacing: 1px; 
+              }
+              .company-name-en { 
+                font-size: 13px; 
+                font-weight: 700; 
+                color: rgba(255,255,255,0.95); 
+                margin-bottom: 6px; 
+                letter-spacing: 0.8px; 
+              }
+              .company-info { 
+                font-size: 10px; 
+                color: #000000; 
+                line-height: 1.5; 
+                background: rgba(255,255,255,0.92); 
+                padding: 10px 12px; 
+                border-radius: 6px; 
+                margin-top: 8px; 
+              }
+              .approval-badge { 
+                background: white; 
+                padding: 10px 15px; 
+                border-radius: 6px; 
+                text-align: right; 
+                box-shadow: 0 3px 10px rgba(0,0,0,0.08); 
+              }
+              .approval-title { 
+                font-size: 20px; 
+                font-weight: 900; 
+                color: #2563eb; 
+                margin-bottom: 4px; 
+              }
+              .approval-title-en { 
+                font-size: 11px; 
+                color: #666; 
+                font-weight: 600; 
+              }
+              .approval-number { 
+                font-size: 14px; 
+                color: #2563eb; 
+                font-weight: 800; 
+                margin-top: 6px; 
+              }
+              .info-section { 
+                margin-top: 18px; 
+                display: grid; 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 12px; 
+              }
+              .info-box { 
+                background: linear-gradient(to right, #eff6ff 0%, #dbeafe 100%); 
+                padding: 12px; 
+                border-radius: 8px; 
+                border-left: 4px solid #2563eb; 
+              }
+              .info-label { 
+                font-size: 9px; 
+                color: #666; 
+                margin-bottom: 4px; 
+                font-weight: 600; 
+                text-transform: uppercase; 
+                letter-spacing: 0.5px; 
+              }
+              .info-value { 
+                font-size: 13px; 
+                font-weight: 700; 
+                color: #1a1a1a; 
+              }
+              .status-badge {
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 12px;
+                text-transform: uppercase;
+                ${item.status === 'approved' ? 'background: #dcfce7; color: #166534;' :
+                  item.status === 'pending' ? 'background: #fef3c7; color: #d97706;' :
+                  'background: #fecaca; color: #dc2626;'}
+              }
+              .total-section { 
+                margin-top: 18px; 
+                background: linear-gradient(to right, #eff6ff 0%, #dbeafe 100%); 
+                padding: 14px; 
+                border-radius: 8px; 
+              }
+              .total-row { 
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+                padding: 12px; 
+                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); 
+                border-radius: 6px; 
+                color: white;
+              }
+              .total-label { 
+                font-size: 16px; 
+                font-weight: 800; 
+                letter-spacing: 0.5px; 
+              }
+              .total-value { 
+                font-size: 20px; 
+                font-weight: 900; 
+              }
+              .remarks-section {
+                margin-top: 18px;
+                padding: 14px;
+                background: linear-gradient(to right, #eff6ff 0%, #dbeafe 100%);
+                border-left: 4px solid #2563eb;
+                border-radius: 0 8px 8px 0;
+              }
+              .remarks-title {
+                font-size: 12px;
+                font-weight: 700;
+                color: #374151;
+                margin-bottom: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+              }
+              .remarks-content {
+                font-size: 11px;
+                color: #1a1a1a;
+                line-height: 1.6;
+              }
+              .footer { 
+                margin-top: 20px; 
+                padding-top: 14px; 
+                border-top: 2px solid #dbeafe; 
+                text-align: center; 
+                color: #999; 
+                font-size: 9px; 
+                line-height: 1.6; 
+              }
+              .print-date { 
+                color: #666; 
+                font-weight: 600; 
+                margin-bottom: 4px; 
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <div class="logo-section">
+                  <img src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=375,fit=crop,q=95/AMqDpBqx0RHlW36D/kenergysave-logo-m6L2JxknygHwL0Bj.png" alt="Company Logo" class="logo">
+                  <div>
+                    <div class="company-name">${locale === 'ko' ? '주식회사 제라' : 'ZERA Co., Ltd'}</div>
+                    <div class="company-name-en">${locale === 'ko' ? 'ZERA Co., Ltd' : '주식회사 제라'}</div>
+                    <div class="company-info">
+                      <strong>${locale === 'ko' ? '주소' : 'Address'}:</strong> ${locale === 'ko' ? '경기도 군포시 엘에스로166번길 16-10, 2층' : '2F, 16-10, 166beon-gil, Elseso-ro, Gunpo-si, Gyeonggi-do, Korea'}<br>
+                      <strong>${locale === 'ko' ? '전화' : 'Tel'}:</strong> +82 31-427-1380 | <strong>${locale === 'ko' ? '이메일' : 'Email'}:</strong> info@zera-energy.com<br>
+                      <strong>Website:</strong> www.zera-energy.com
+                    </div>
+                  </div>
+                </div>
+                <div class="approval-badge">
+                  <div class="approval-title">${locale === 'ko' ? '판매승인서' : 'SALES APPROVAL'}</div>
+                  <div class="approval-title-en">${locale === 'ko' ? 'Sales Approval' : '판매승인서'}</div>
+                  <div class="approval-number">${item.approvalNumber}</div>
+                </div>
+              </div>
+              
+              <div class="info-section">
+                <div class="info-box">
+                  <div class="info-label">${t.region}</div>
+                  <div class="info-value">${regions.find(r => r.key === item.region)?.name}</div>
+                </div>
+                <div class="info-box">
+                  <div class="info-label">${t.requestedBy}</div>
+                  <div class="info-value">${item.requestedBy}</div>
+                </div>
+                <div class="info-box">
+                  <div class="info-label">${t.approvalDate}</div>
+                  <div class="info-value">${item.approvalDate}</div>
+                </div>
+                <div class="info-box">
+                  <div class="info-label">${t.approved}</div>
+                  <div class="info-value"><span class="status-badge">${statusText}</span></div>
+                </div>
+                <div class="info-box">
+                  <div class="info-label">${t.productName}</div>
+                  <div class="info-value">${item.productName}</div>
+                </div>
+                <div class="info-box">
+                  <div class="info-label">${t.quantity}</div>
+                  <div class="info-value">${item.quantity.toLocaleString()}</div>
+                </div>
+              </div>
+              
+              <div class="total-section">
+                <div class="total-row">
+                  <span class="total-label">${t.amount}</span>
+                  <span class="total-value">${formatCurrency(item.amount)}</span>
+                </div>
+              </div>
+              
+              ${item.remarks ? `
+                <div class="remarks-section">
+                  <div class="remarks-title">${t.remarks}</div>
+                  <div class="remarks-content">${item.remarks}</div>
+                </div>
+              ` : ''}
+              
+              <div class="footer">
+                <div class="print-date">${locale === 'ko' ? '출력일' : 'Print Date'}: ${currentDate}</div>
+                <p>${locale === 'ko' ? '본 문서는 시스템에서 자동 생성되었습니다' : 'This document was automatically generated by the system'}</p>
+                <p>${locale === 'ko' ? '문의사항: +82 31-427-1380 | info@zera-energy.com' : 'Contact: +82 31-427-1380 | info@zera-energy.com'}</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+      statusText,
+      currentDate
+    };
+  };
+
+  const handlePrintSingle = (item: SalesApproval) => {
+    const { html } = generateReportContent(item);
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
+  const handlePreview = (item: SalesApproval) => {
+    setPreviewItem(item);
+    setIsPreviewModalOpen(true);
+  };
+
+  const handleExportPDF = (item: SalesApproval) => {
+    const { html } = generateReportContent(item);
+    
+    // Create a temporary window for PDF export
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      
+      // Use browser's built-in print to PDF functionality
+      printWindow.onload = () => {
+        printWindow.focus();
+        // This will open the print dialog where user can select "Save as PDF"
+        printWindow.print();
+      };
+    }
+  };
+
   const handleCreate = () => {
     const newId = Math.max(...items.map(o => o.id)) + 1;
     setItems([...items, {
@@ -90,8 +402,24 @@ export default function DomesticSalesApprovalsPage() {
     setNewItem({ region: 'seoul', productName: '', quantity: 0, amount: 0, requestedBy: '', remarks: '' });
   };
 
+  const handleCreateCustomer = () => {
+    // In a real app, this would make an API call
+    console.log('Creating customer:', newCustomer);
+    setIsCustomerModalOpen(false);
+    setNewCustomer({ name: '', companyName: '', email: '', phone: '', address: '', region: 'seoul', contactPerson: '', notes: '' });
+    alert(locale === 'ko' ? '고객이 성공적으로 추가되었습니다!' : 'Customer added successfully!');
+  };
+
+  const handleCreateDealer = () => {
+    // In a real app, this would make an API call
+    console.log('Creating dealer:', newDealer);
+    setIsDealerModalOpen(false);
+    setNewDealer({ dealerName: '', companyName: '', email: '', phone: '', address: '', region: 'seoul', contactPerson: '', businessType: '', notes: '' });
+    alert(locale === 'ko' ? '딜러가 성공적으로 추가되었습니다!' : 'Dealer added successfully!');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-200 to-gray-300">
       {/* Header */}
       <div className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -136,6 +464,12 @@ export default function DomesticSalesApprovalsPage() {
             <button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
               <Plus className="w-4 h-4" />{t.addNew}
             </button>
+            <button onClick={() => setIsCustomerModalOpen(true)} className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+              <Users className="w-4 h-4" />{t.newCustomer}
+            </button>
+            <button onClick={() => setIsDealerModalOpen(true)} className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+              <Building2 className="w-4 h-4" />{t.newDealer}
+            </button>
           </div>
         </div>
 
@@ -169,8 +503,10 @@ export default function DomesticSalesApprovalsPage() {
                     <td className="px-4 py-3 text-center">{statusBadge(item.status)}</td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => setSelectedItem(item)} className="text-blue-500 hover:text-blue-700"><Eye className="w-4 h-4" /></button>
-                        <button onClick={() => handleDelete(item.id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => setSelectedItem(item)} className="text-blue-500 hover:text-blue-700" title="View Details"><Eye className="w-4 h-4" /></button>
+                        <button onClick={() => handlePreview(item)} className="text-indigo-500 hover:text-indigo-700" title="Preview Report"><FileText className="w-4 h-4" /></button>
+                        <button onClick={() => handlePrintSingle(item)} className="text-green-500 hover:text-green-700" title="Print Report"><Printer className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(item.id)} className="text-red-500 hover:text-red-700" title="Delete"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>
@@ -206,8 +542,8 @@ export default function DomesticSalesApprovalsPage() {
               <div><p className="text-xs text-gray-500">{t.remarks}</p><p className="font-medium">{selectedItem.remarks}</p></div>
               <div className="flex justify-center">{statusBadge(selectedItem.status)}</div>
               <div className="flex gap-2 pt-2">
-                <button className="flex-1 flex items-center justify-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200"><Printer className="w-4 h-4" />{t.printDocument}</button>
-                <button className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"><FileDown className="w-4 h-4" />{t.exportPDF}</button>
+                <button onClick={() => handlePrintSingle(selectedItem)} className="flex-1 flex items-center justify-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200"><Printer className="w-4 h-4" />{t.printDocument}</button>
+                <button onClick={() => handleExportPDF(selectedItem)} className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"><FileDown className="w-4 h-4" />{t.exportPDF}</button>
               </div>
             </div>
           </div>
@@ -254,6 +590,238 @@ export default function DomesticSalesApprovalsPage() {
               <div className="flex gap-2 pt-2">
                 <button onClick={() => setIsAddModalOpen(false)} className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">{t.cancel}</button>
                 <button onClick={handleCreate} className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">{t.save}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Customer Modal */}
+      {isCustomerModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b bg-green-50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                  <Users className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-lg font-bold text-green-800">{t.newCustomer}</h2>
+              </div>
+              <button onClick={() => setIsCustomerModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '고객명' : 'Customer Name'}</label>
+                  <input type="text" value={newCustomer.name} onChange={e => setNewCustomer({ ...newCustomer, name: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500" placeholder={locale === 'ko' ? '고객 이름을 입력하세요' : 'Enter customer name'} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '회사명' : 'Company Name'}</label>
+                  <input type="text" value={newCustomer.companyName} onChange={e => setNewCustomer({ ...newCustomer, companyName: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500" placeholder={locale === 'ko' ? '회사명을 입력하세요' : 'Enter company name'} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '이메일' : 'Email'}</label>
+                  <input type="email" value={newCustomer.email} onChange={e => setNewCustomer({ ...newCustomer, email: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500" placeholder={locale === 'ko' ? 'example@company.com' : 'example@company.com'} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '전화번호' : 'Phone Number'}</label>
+                  <input type="tel" value={newCustomer.phone} onChange={e => setNewCustomer({ ...newCustomer, phone: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500" placeholder={locale === 'ko' ? '010-1234-5678' : '+82-10-1234-5678'} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '주소' : 'Address'}</label>
+                <input type="text" value={newCustomer.address} onChange={e => setNewCustomer({ ...newCustomer, address: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500" placeholder={locale === 'ko' ? '서울특별시 강남구...' : 'Seoul, Gangnam-gu...'} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t.region}</label>
+                  <select value={newCustomer.region} onChange={e => setNewCustomer({ ...newCustomer, region: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                    {regions.map(r => <option key={r.key} value={r.key}>{r.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '담당자' : 'Contact Person'}</label>
+                  <input type="text" value={newCustomer.contactPerson} onChange={e => setNewCustomer({ ...newCustomer, contactPerson: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500" placeholder={locale === 'ko' ? '담당자명' : 'Contact person name'} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '메모' : 'Notes'}</label>
+                <textarea value={newCustomer.notes} onChange={e => setNewCustomer({ ...newCustomer, notes: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500" rows={3} placeholder={locale === 'ko' ? '고객에 대한 추가 정보...' : 'Additional information about the customer...'} />
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <button onClick={() => setIsCustomerModalOpen(false)} className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 font-medium">{locale === 'ko' ? '취소' : 'Cancel'}</button>
+                <button onClick={handleCreateCustomer} className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-medium">{locale === 'ko' ? '고객 추가' : 'Add Customer'}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Dealer Modal */}
+      {isDealerModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b bg-purple-50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-lg font-bold text-purple-800">{t.newDealer}</h2>
+              </div>
+              <button onClick={() => setIsDealerModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '딜러명' : 'Dealer Name'}</label>
+                  <input type="text" value={newDealer.dealerName} onChange={e => setNewDealer({ ...newDealer, dealerName: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500" placeholder={locale === 'ko' ? '딜러 이름을 입력하세요' : 'Enter dealer name'} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '회사명' : 'Company Name'}</label>
+                  <input type="text" value={newDealer.companyName} onChange={e => setNewDealer({ ...newDealer, companyName: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500" placeholder={locale === 'ko' ? '회사명을 입력하세요' : 'Enter company name'} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '이메일' : 'Email'}</label>
+                  <input type="email" value={newDealer.email} onChange={e => setNewDealer({ ...newDealer, email: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500" placeholder={locale === 'ko' ? 'dealer@company.com' : 'dealer@company.com'} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '전화번호' : 'Phone Number'}</label>
+                  <input type="tel" value={newDealer.phone} onChange={e => setNewDealer({ ...newDealer, phone: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500" placeholder={locale === 'ko' ? '010-1234-5678' : '+82-10-1234-5678'} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '주소' : 'Address'}</label>
+                <input type="text" value={newDealer.address} onChange={e => setNewDealer({ ...newDealer, address: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500" placeholder={locale === 'ko' ? '서울특별시 강남구...' : 'Seoul, Gangnam-gu...'} />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t.region}</label>
+                  <select value={newDealer.region} onChange={e => setNewDealer({ ...newDealer, region: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500">
+                    {regions.map(r => <option key={r.key} value={r.key}>{r.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '담당자' : 'Contact Person'}</label>
+                  <input type="text" value={newDealer.contactPerson} onChange={e => setNewDealer({ ...newDealer, contactPerson: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500" placeholder={locale === 'ko' ? '담당자명' : 'Contact person'} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '사업 유형' : 'Business Type'}</label>
+                  <select value={newDealer.businessType} onChange={e => setNewDealer({ ...newDealer, businessType: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500">
+                    <option value="">{locale === 'ko' ? '선택하세요' : 'Select type'}</option>
+                    <option value="retail">{locale === 'ko' ? '소매업' : 'Retail'}</option>
+                    <option value="wholesale">{locale === 'ko' ? '도매업' : 'Wholesale'}</option>
+                    <option value="distribution">{locale === 'ko' ? '유통업' : 'Distribution'}</option>
+                    <option value="installation">{locale === 'ko' ? '설치업' : 'Installation'}</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '메모' : 'Notes'}</label>
+                <textarea value={newDealer.notes} onChange={e => setNewDealer({ ...newDealer, notes: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500" rows={3} placeholder={locale === 'ko' ? '딜러에 대한 추가 정보...' : 'Additional information about the dealer...'} />
+              </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <button onClick={() => setIsDealerModalOpen(false)} className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 font-medium">{locale === 'ko' ? '취소' : 'Cancel'}</button>
+                <button onClick={handleCreateDealer} className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 font-medium">{locale === 'ko' ? '딜러 추가' : 'Add Dealer'}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {isPreviewModalOpen && previewItem && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b bg-indigo-50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-lg font-bold text-indigo-800">{locale === 'ko' ? '문서 미리보기' : 'Document Preview'} - {previewItem.approvalNumber}</h2>
+              </div>
+              <button onClick={() => setIsPreviewModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-6">
+              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6" style={{ minHeight: '800px', fontFamily: 'Arial, sans-serif' }}>
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-lg mb-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-white rounded-lg p-2">
+                        <img src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=375,fit=crop,q=95/AMqDpBqx0RHlW36D/kenergysave-logo-m6L2JxknygHwL0Bj.png" alt="Company Logo" className="w-full h-full object-contain" />
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold">{locale === 'ko' ? '주식회사 제라' : 'ZERA Co., Ltd'}</div>
+                        <div className="text-xs opacity-90">{locale === 'ko' ? 'ZERA Co., Ltd' : '주식회사 제라'}</div>
+                        <div className="text-xs mt-2 bg-white text-gray-800 rounded px-2 py-1 inline-block">
+                          <strong>{locale === 'ko' ? '주소' : 'Address'}:</strong> {locale === 'ko' ? '경기도 군포시 엘에스로166번길 16-10, 2층' : '2F, 16-10, 166beon-gil, Elseso-ro, Gunpo-si, Gyeonggi-do, Korea'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right bg-white text-blue-600 p-3 rounded-lg">
+                      <div className="text-lg font-bold">{locale === 'ko' ? '판매승인서' : 'SALES APPROVAL'}</div>
+                      <div className="text-xs text-gray-600">{locale === 'ko' ? 'Sales Approval' : '판매승인서'}</div>
+                      <div className="text-sm font-bold mt-1">{previewItem.approvalNumber}</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500">
+                    <div className="text-xs text-gray-600 uppercase font-semibold">{t.region}</div>
+                    <div className="text-sm font-bold text-gray-800">{regions.find(r => r.key === previewItem.region)?.name}</div>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500">
+                    <div className="text-xs text-gray-600 uppercase font-semibold">{t.requestedBy}</div>
+                    <div className="text-sm font-bold text-gray-800">{previewItem.requestedBy}</div>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500">
+                    <div className="text-xs text-gray-600 uppercase font-semibold">{t.approvalDate}</div>
+                    <div className="text-sm font-bold text-gray-800">{previewItem.approvalDate}</div>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500">
+                    <div className="text-xs text-gray-600 uppercase font-semibold">{t.approved}</div>
+                    <div className="text-sm font-bold text-gray-800">{statusBadge(previewItem.status)}</div>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500">
+                    <div className="text-xs text-gray-600 uppercase font-semibold">{t.productName}</div>
+                    <div className="text-sm font-bold text-gray-800">{previewItem.productName}</div>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500">
+                    <div className="text-xs text-gray-600 uppercase font-semibold">{t.quantity}</div>
+                    <div className="text-sm font-bold text-gray-800">{previewItem.quantity.toLocaleString()}</div>
+                  </div>
+                </div>
+                
+                <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                  <div className="bg-blue-600 text-white p-3 rounded-lg flex justify-between items-center">
+                    <span className="font-bold text-lg">{t.amount}</span>
+                    <span className="font-bold text-xl">{formatCurrency(previewItem.amount)}</span>
+                  </div>
+                </div>
+                
+                {previewItem.remarks && (
+                  <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 mb-6">
+                    <div className="text-xs text-gray-600 uppercase font-semibold mb-2">{t.remarks}</div>
+                    <div className="text-sm text-gray-800 leading-relaxed">{previewItem.remarks}</div>
+                  </div>
+                )}
+                
+                <div className="border-t-2 border-blue-200 pt-4 text-center text-xs text-gray-500">
+                  <div className="font-semibold text-gray-600 mb-1">{locale === 'ko' ? '출력일' : 'Print Date'}: {new Date().toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}</div>
+                  <p>{locale === 'ko' ? '본 문서는 시스템에서 자동 생성되었습니다' : 'This document was automatically generated by the system'}</p>
+                  <p>{locale === 'ko' ? '문의사항: +82 31-427-1380 | info@zera-energy.com' : 'Contact: +82 31-427-1380 | info@zera-energy.com'}</p>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 pt-4 border-t">
+                <button onClick={() => setIsPreviewModalOpen(false)} className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 font-medium">{locale === 'ko' ? '닫기' : 'Close'}</button>
+                <button onClick={() => { handlePrintSingle(previewItem); setIsPreviewModalOpen(false); }} className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-medium flex items-center justify-center gap-2">
+                  <Printer className="w-4 h-4" />{locale === 'ko' ? '인쇄하기' : 'Print Document'}
+                </button>
               </div>
             </div>
           </div>
