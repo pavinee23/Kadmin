@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from '@/lib/LocaleContext';
 import { translations } from '@/lib/translations';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { ArrowLeft, DollarSign, Calendar, BarChart3, Plus, X, Trash2 } from 'lucide-react';
+import { ArrowLeft, DollarSign, Calendar, BarChart3, Plus, X, Trash2, FileText, Upload } from 'lucide-react';
 
 interface Expense {
   id: number;
@@ -15,6 +15,8 @@ interface Expense {
   amount: number;
   paidBy: string;
   receipt: boolean;
+  receiptFile?: string;
+  recipient?: string;
 }
 
 export default function ExpensesPage() {
@@ -24,6 +26,7 @@ export default function ExpensesPage() {
   const [viewMode, setViewMode] = useState<'daily' | 'monthly' | 'yearly'>('daily');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [viewReceiptModal, setViewReceiptModal] = useState<{ isOpen: boolean; receiptFile?: string; description?: string }>({ isOpen: false });
 
   const categories = [
     { value: 'salary', label: t.salary, color: 'bg-blue-100 text-blue-700' },
@@ -60,8 +63,19 @@ export default function ExpensesPage() {
   ]);
 
   const [newExpense, setNewExpense] = useState({
-    date: '2026-02-15', category: 'salary', description: '', amount: 0, paidBy: '',
+    date: '2026-02-15', category: 'salary', description: '', amount: 0, paidBy: '', recipient: '', receiptFile: '',
   });
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewExpense({ ...newExpense, receiptFile: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const formatCurrency = (v: number) => '₩' + new Intl.NumberFormat(locale === 'ko' ? 'ko-KR' : 'en-US').format(v);
 
@@ -121,10 +135,12 @@ export default function ExpensesPage() {
       description: newExpense.description,
       amount: newExpense.amount,
       paidBy: newExpense.paidBy,
-      receipt: false,
+      receipt: !!newExpense.receiptFile,
+      receiptFile: newExpense.receiptFile,
+      recipient: newExpense.recipient,
     }]);
     setIsAddModalOpen(false);
-    setNewExpense({ date: '2026-02-15', category: 'salary', description: '', amount: 0, paidBy: '' });
+    setNewExpense({ date: '2026-02-15', category: 'salary', description: '', amount: 0, paidBy: '', recipient: '', receiptFile: '' });
   };
 
   const renderGroupedData = () => {
@@ -153,6 +169,7 @@ export default function ExpensesPage() {
                   <th className="text-center px-4 py-2 text-xs font-medium text-gray-500 uppercase">{t.category}</th>
                   <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">{t.description}</th>
                   <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">{locale === 'ko' ? '담당' : 'Paid By'}</th>
+                  <th className="text-left px-4 py-2 text-xs font-medium text-gray-500 uppercase">{locale === 'ko' ? '수령인' : 'Recipient'}</th>
                   <th className="text-right px-4 py-2 text-xs font-medium text-gray-500 uppercase">{t.amount}</th>
                   <th className="text-center px-4 py-2 text-xs font-medium text-gray-500 uppercase">{locale === 'ko' ? '영수증' : 'Receipt'}</th>
                   <th className="text-center px-4 py-2 text-xs font-medium text-gray-500 uppercase">{t.actions}</th>
@@ -166,10 +183,11 @@ export default function ExpensesPage() {
                     <td className="px-4 py-3 text-center">{categoryBadge(expense.category)}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{expense.description}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{expense.paidBy}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{expense.recipient || '-'}</td>
                     <td className="px-4 py-3 text-sm font-semibold text-gray-900 text-right">{formatCurrency(expense.amount)}</td>
                     <td className="px-4 py-3 text-center">
-                      {expense.receipt
-                        ? <span className="text-green-500 text-lg">✓</span>
+                      {expense.receipt && expense.receiptFile
+                        ? <button onClick={() => setViewReceiptModal({ isOpen: true, receiptFile: expense.receiptFile, description: expense.description })} className="text-green-500 hover:text-green-700 text-lg cursor-pointer">✓</button>
                         : <span className="text-red-400 text-lg">✗</span>
                       }
                     </td>
@@ -280,12 +298,57 @@ export default function ExpensesPage() {
               <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.description}</label><input value={newExpense.description} onChange={e => setNewExpense({ ...newExpense, description: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500" /></div>
               <div className="grid grid-cols-2 gap-4">
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.amount}</label><input type="number" value={newExpense.amount} onChange={e => setNewExpense({ ...newExpense, amount: Number(e.target.value) })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '담당자/팀' : 'Paid By'}</label><input value={newExpense.paidBy} onChange={e => setNewExpense({ ...newExpense, paidBy: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '담당자/팀' : 'Paid By'}</label><input value={newExpense.paidBy} onChange={e => setNewExpense({ ...newExpense, paidBy: e.target.value })} placeholder={locale === 'ko' ? '회계팀, 총무팀 등' : 'Accounting, Admin, etc.'} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500" /></div>
+              </div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '수령인 (지급받는 사람/업체)' : 'Recipient (Payment Receiver)'}</label><input value={newExpense.recipient} onChange={e => setNewExpense({ ...newExpense, recipient: e.target.value })} placeholder={locale === 'ko' ? '직원명, 업체명 등' : 'Employee name, company name, etc.'} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500" /></div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '영수증 업로드' : 'Upload Receipt'}</label>
+                <div className="flex items-center gap-3">
+                  <label className="flex-1 cursor-pointer">
+                    <div className="w-full border-2 border-dashed border-gray-300 rounded-lg px-4 py-3 hover:border-amber-500 transition-colors flex items-center gap-2">
+                      <Upload className="w-5 h-5 text-gray-400" />
+                      <span className="text-sm text-gray-600">{newExpense.receiptFile ? (locale === 'ko' ? '파일 선택됨' : 'File selected') : (locale === 'ko' ? '파일 선택 (이미지/PDF)' : 'Choose file (Image/PDF)')}</span>
+                    </div>
+                    <input type="file" accept="image/*,application/pdf" onChange={handleFileUpload} className="hidden" />
+                  </label>
+                  {newExpense.receiptFile && (
+                    <button onClick={() => setNewExpense({ ...newExpense, receiptFile: '' })} className="text-red-500 hover:text-red-700"><X className="w-5 h-5" /></button>
+                  )}
+                </div>
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">{t.cancel}</button>
                 <button onClick={handleCreate} className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg">{t.save}</button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Receipt Modal */}
+      {viewReceiptModal.isOpen && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setViewReceiptModal({ isOpen: false })}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-gradient-to-r from-green-500 to-green-700 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileText className="w-6 h-6 text-white" />
+                <div>
+                  <h3 className="text-white font-bold text-lg">{locale === 'ko' ? '영수증 보기' : 'View Receipt'}</h3>
+                  <p className="text-white/80 text-sm">{viewReceiptModal.description}</p>
+                </div>
+              </div>
+              <button onClick={() => setViewReceiptModal({ isOpen: false })} className="text-white/80 hover:text-white"><X className="w-6 h-6" /></button>
+            </div>
+            <div className="p-6 overflow-auto max-h-[calc(90vh-100px)]">
+              {viewReceiptModal.receiptFile && (
+                <div className="flex justify-center">
+                  {viewReceiptModal.receiptFile.startsWith('data:application/pdf') ? (
+                    <iframe src={viewReceiptModal.receiptFile} className="w-full h-[600px] border rounded-lg" />
+                  ) : (
+                    <img src={viewReceiptModal.receiptFile} alt="Receipt" className="max-w-full h-auto rounded-lg shadow-lg" />
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

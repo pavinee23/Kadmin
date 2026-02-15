@@ -86,6 +86,13 @@ export default function HomePage() {
       color: 'bg-violet-500'
     },
     { 
+      icon: Users, 
+      title: locale === 'ko' ? '고객 관리 시스템' : 'Customer Management System',
+      description: locale === 'ko' ? '고객 정보, 주문 이력 및 관계 관리' : 'Manage customer information, order history, and relationships',
+      href: '/customers',
+      color: 'bg-blue-600'
+    },
+    { 
       icon: MessageCircle, 
       title: t.aiAssistant,
       description: t.aiAssistantDesc,

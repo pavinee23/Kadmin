@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useLocale } from '@/lib/LocaleContext';
 import { translations } from '@/lib/translations';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import CompanyLogo from '@/components/CompanyLogo';
 
 export default function InventoryPage() {
   const { locale } = useLocale();
@@ -27,6 +28,7 @@ export default function InventoryPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
+              <CompanyLogo size="md" />
               <Link href="/" className="text-gray-600 hover:text-gray-900">
                 {t.back}
               </Link>
@@ -37,10 +39,6 @@ export default function InventoryPage() {
             </div>
             <div className="flex items-center gap-4">
               <LanguageSwitcher />
-              <button className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
-                <Plus className="w-4 h-4" />
-                {t.addNewProduct}
-              </button>
             </div>
           </div>
         </div>
@@ -111,18 +109,6 @@ export default function InventoryPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
-            <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-              <option>전체 카테고리</option>
-              <option>전자제품</option>
-              <option>액세서리</option>
-              <option>의류</option>
-            </select>
-            <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
-              <option>전체 상태</option>
-              <option>재고 있음</option>
-              <option>재고 부족</option>
-              <option>품절</option>
-            </select>
           </div>
         </div>
 

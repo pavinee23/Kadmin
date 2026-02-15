@@ -5,7 +5,18 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from '@/lib/LocaleContext';
 import { translations } from '@/lib/translations';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { ArrowLeft, FileText, Plus, Search, Eye, Trash2, X, Printer } from 'lucide-react';
+import { ArrowLeft, FileText, Plus, Search, Eye, Trash2, X, Printer, CreditCard, Banknote } from 'lucide-react';
+
+interface SalesContract {
+  id: number;
+  contractNumber: string;
+  buyer: string;
+  productName: string;
+  quantity: number;
+  contractValue: number;
+  market: 'domestic' | 'international';
+  region: string;
+}
 
 interface Invoice {
   id: number;
@@ -20,6 +31,7 @@ interface Invoice {
   totalAmount: number;
   paymentStatus: 'paid' | 'unpaid' | 'partial' | 'overdue';
   notes: string;
+  salesContractNumber?: string;
 }
 
 export default function InvoicesPage() {
@@ -30,6 +42,21 @@ export default function InvoicesPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Sales Contracts from Domestic and International Markets
+  const [salesContracts] = useState<SalesContract[]>([
+    // Domestic Market - Korea
+    { id: 1, contractNumber: 'DSC-2026-001', buyer: '서울특별시청 (Seoul Metropolitan Government)', productName: '태양광 패널 시스템 500kW', quantity: 1, contractValue: 2500000000, market: 'domestic', region: '서울/경기' },
+    { id: 2, contractNumber: 'DSC-2026-002', buyer: '삼성중공업 (Samsung Heavy Industries)', productName: '에너지 절감 장치 A200', quantity: 200, contractValue: 1800000000, market: 'domestic', region: '부산/경남' },
+    { id: 3, contractNumber: 'DSC-2026-003', buyer: 'POSCO 포항제철', productName: '스마트 인버터 SI-3000', quantity: 150, contractValue: 1350000000, market: 'domestic', region: '대구/경북' },
+    { id: 4, contractNumber: 'DSC-2026-004', buyer: 'KAIST', productName: '전력 모니터링 시스템 PMS', quantity: 5, contractValue: 450000000, market: 'domestic', region: '대전/충청' },
+    { id: 5, contractNumber: 'DSC-2026-005', buyer: '현대건설 (Hyundai E&C)', productName: 'EV 충전기 EC-300', quantity: 300, contractValue: 900000000, market: 'domestic', region: '서울/경기' },
+    { id: 6, contractNumber: 'DSC-2026-006', buyer: '한국전력공사 전남지사 (KEPCO Jeonnam)', productName: 'LED 조명 모듈 LM-100', quantity: 1000, contractValue: 320000000, market: 'domestic', region: '광주/전라' },
+    { id: 7, contractNumber: 'DSC-2026-007', buyer: '인천국제공항공사 (Incheon Airport Corp)', productName: '태양광 컨트롤러 SC-200', quantity: 100, contractValue: 680000000, market: 'domestic', region: '인천/강원' },
+    { id: 8, contractNumber: 'DSC-2026-008', buyer: '제주에너지공사 (Jeju Energy Corp)', productName: '풍력 변환 시스템 WCS-500', quantity: 10, contractValue: 2200000000, market: 'domestic', region: '제주' },
+    { id: 9, contractNumber: 'DSC-2026-009', buyer: 'LG화학 울산공장 (LG Chem Ulsan)', productName: '배터리 저장 시스템 BS-500', quantity: 30, contractValue: 1050000000, market: 'domestic', region: '부산/경남' },
+    { id: 10, contractNumber: 'DSC-2026-010', buyer: '경북도청 (Gyeongbuk Provincial Office)', productName: '에너지 감사 키트 EAK-1', quantity: 50, contractValue: 180000000, market: 'domestic', region: '대구/경북' },
+  ]);
 
   const [invoices, setInvoices] = useState<Invoice[]>([
     { id: 1, invoiceNumber: 'INV-2026-001', customer: 'Brunei Energy Corp', issueDate: '2026-02-15', dueDate: '2026-03-15', items: [{ name: 'Solar Inverter SI-5000', quantity: 20, unit: 'pcs', unitPrice: 3500000 }], subtotal: 70000000, taxRate: 10, taxAmount: 7000000, totalAmount: 77000000, paymentStatus: 'paid', notes: 'Payment received via wire transfer' },
@@ -45,8 +72,31 @@ export default function InvoicesPage() {
   ]);
 
   const [newInvoice, setNewInvoice] = useState({
-    customer: '', issueDate: '2026-02-15', dueDate: '', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, notes: '',
+    salesContractId: '', customer: '', issueDate: '2026-02-15', dueDate: '', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, notes: '', paymentMethod: 'bank_transfer'
   });
+
+  const handleContractSelect = (contractId: string) => {
+    if (!contractId) {
+      setNewInvoice({ salesContractId: '', customer: '', issueDate: '2026-02-15', dueDate: '', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, notes: '', paymentMethod: 'bank_transfer' });
+      return;
+    }
+    const contract = salesContracts.find(c => c.id === Number(contractId));
+    if (contract) {
+      const unitPrice = Math.round(contract.contractValue / contract.quantity);
+      setNewInvoice({
+        salesContractId: contractId,
+        customer: contract.buyer,
+        issueDate: '2026-02-15',
+        dueDate: '',
+        itemName: contract.productName,
+        quantity: contract.quantity,
+        unit: 'pcs',
+        unitPrice: unitPrice,
+        notes: `Sales Contract: ${contract.contractNumber} | ${contract.market === 'domestic' ? '국내' : '해외'} | ${contract.region}`,
+        paymentMethod: 'bank_transfer'
+      });
+    }
+  };
 
   const formatCurrency = (v: number) => '₩' + new Intl.NumberFormat(locale === 'ko' ? 'ko-KR' : 'en-US').format(v);
 
@@ -68,6 +118,497 @@ export default function InvoicesPage() {
     }
   };
 
+  const handlePrint = (invoice: Invoice) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const contractInfo = invoice.salesContractNumber ? `<div class="contract-badge"><span class="badge-icon">\ud83d\udcdc</span> Sales Contract: <strong>${invoice.salesContractNumber}</strong></div>` : '';
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Invoice ${invoice.invoiceNumber}</title>
+        <meta charset="UTF-8">
+        <style>
+          @page { size: A4; margin: 0; }
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { 
+            font-family: 'Segoe UI', 'Malgun Gothic', Arial, sans-serif; 
+            padding: 12mm; 
+            background: white; 
+            color: #1a1a1a;
+          }
+          
+          .container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80px;
+            font-weight: 900;
+            color: rgba(249, 115, 22, 0.02);
+            z-index: 0;
+            pointer-events: none;
+            letter-spacing: 8px;
+          }
+          
+          .content { position: relative; z-index: 1; }
+          
+          .header {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            margin: -18px -18px 18px -18px;
+            padding: 20px 18px;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 250px;
+            height: 250px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+          }
+          
+          .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+            z-index: 1;
+          }
+          
+          .logo-section {
+            flex: 1;
+          }
+          
+          .company-logo {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+            padding: 8px;
+          }
+          
+          .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+          }
+          
+          .company-name {
+            font-size: 20px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 2px;
+            letter-spacing: 1.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          }
+          
+          .company-name-en {
+            font-size: 13px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.95);
+            margin-bottom: 6px;
+            letter-spacing: 0.8px;
+          }
+          
+          .company-info {
+            font-size: 10px;
+            color: #000000;
+            line-height: 1.5;
+            background: rgba(255,255,255,0.92);
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+          }
+          
+          .invoice-badge {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            text-align: right;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+          }
+          
+          .invoice-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: #f97316;
+            margin-bottom: 3px;
+            letter-spacing: 1.5px;
+          }
+          
+          .invoice-number {
+            font-size: 11px;
+            color: #666;
+            font-weight: 600;
+          }
+          
+          .contract-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #fef3f2, #fff7ed);
+            border: 1.5px dashed #fed7aa;
+            padding: 5px 10px;
+            border-radius: 6px;
+            margin: 10px 0 8px 0;
+            font-size: 9px;
+            color: #ea580c;
+            font-weight: 600;
+          }
+          
+          .badge-icon { font-size: 11px; margin-right: 3px; }
+          
+          .section-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: #f97316;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin: 15px 0 10px 0;
+            padding-bottom: 5px;
+            border-bottom: 1.5px solid #fed7aa;
+          }
+          
+          .info-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 10px;
+            margin: 12px 0;
+          }
+          
+          .info-box {
+            background: linear-gradient(135deg, #fef3f2 0%, #fff7ed 100%);
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #f97316;
+            box-shadow: 0 1px 5px rgba(249,115,22,0.06);
+          }
+          
+          .info-label {
+            font-size: 8px;
+            color: #ea580c;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: 0.4px;
+          }
+          
+          .info-value {
+            font-size: 11px;
+            color: #1a1a1a;
+            font-weight: 700;
+            line-height: 1.3;
+          }
+          
+          table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 12px 0;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+          }
+          
+          thead {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+          }
+          
+          th {
+            color: white;
+            padding: 10px 8px;
+            text-align: left;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+          }
+          
+          tbody tr {
+            background: white;
+          }
+          
+          tbody tr:nth-child(even) {
+            background: #fef3f2;
+          }
+          
+          td {
+            padding: 8px;
+            border-bottom: 1px solid #fed7aa;
+            font-size: 10px;
+            color: #333;
+          }
+          
+          tbody tr:last-child td {
+            border-bottom: none;
+          }
+          
+          .text-right { text-align: right; font-weight: 600; }
+          
+          .total-section {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #fef3f2, #fff7ed);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1.5px solid #fed7aa;
+          }
+          
+          .total-row {
+            display: flex;
+            justify-content: flex-end;
+            padding: 6px 0;
+            font-size: 11px;
+            border-bottom: 1px dashed #fed7aa;
+          }
+          
+          .total-row:last-child {
+            border-bottom: none;
+          }
+          
+          .total-label {
+            width: 150px;
+            font-weight: 700;
+            color: #666;
+          }
+          
+          .total-value {
+            width: 150px;
+            text-align: right;
+            font-weight: 700;
+            color: #1a1a1a;
+          }
+          
+          .grand-total {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            margin: 10px -12px -12px -12px;
+            padding: 10px 12px;
+            border-radius: 0 0 4px 4px;
+          }
+          
+          .grand-total .total-label,
+          .grand-total .total-value {
+            color: white;
+            font-size: 14px;
+            font-weight: 900;
+          }
+          
+          .notes-section {
+            margin-top: 15px;
+            padding: 12px;
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border: 1.5px solid #fcd34d;
+            border-radius: 6px;
+          }
+          
+          .notes-title {
+            font-size: 9px;
+            font-weight: 700;
+            color: #d97706;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+          }
+          
+          .notes-text {
+            font-size: 9px;
+            color: #92400e;
+            line-height: 1.4;
+          }
+          
+          .signature-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 12px;
+            border-top: 1.5px dashed #e5e7eb;
+          }
+          
+          .signature-box {
+            text-align: center;
+          }
+          
+          .signature-label {
+            font-size: 8px;
+            color: #666;
+            margin-bottom: 25px;
+            font-weight: 600;
+          }
+          
+          .signature-line {
+            border-top: 1.5px solid #333;
+            margin: 0 15px;
+            padding-top: 5px;
+            font-size: 9px;
+            color: #333;
+            font-weight: 700;
+          }
+          
+          .footer {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 7px;
+            color: #999;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+          }
+          
+          .footer-logo {
+            font-size: 12px;
+            font-weight: 900;
+            color: #f97316;
+            margin-bottom: 5px;
+          }
+          
+          @media print {
+            .no-print { display: none; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="watermark">INVOICE</div>
+          <div class="content">
+            <div class="header">
+              <div class="header-content">
+                <div class="logo-section">
+                  <div class="company-logo">
+                    <img src="/kenergysave-logo.avif" alt="ZERA Company Logo" />
+                  </div>
+                  <div class="company-name">\uc8fc\uc2dd\ud68c\uc0ac \uc81c\ub77c</div>
+                  <div class="company-name-en">ZERA Co., Ltd</div>
+                  <div class="company-info">
+                    <strong>\uc8fc\uc18c:</strong> \uacbd\uae30\ub3c4 \uad70\ud3ec\uc2dc \uc5d8\uc5d0\uc2a4\ub85c166\ubc88\uae38 16-10, 2\uce35<br/>
+                    <strong>Address:</strong> 2F, 16-10, 166beon-gil, Elseso-ro, Gunpo-si, Gyeonggi-do, Korea<br/>
+                    <strong>\uc804\ud654 / Tel:</strong> +82 31-427-1380 | <strong>\uc774\uba54\uc77c / Email:</strong> info@zera-energy.com<br/>
+                    <strong>Website:</strong> www.zera-energy.com
+                  </div>
+                </div>
+                <div class="invoice-badge">
+                  <div class="invoice-title">INVOICE</div>
+                  <div class="invoice-number">#${invoice.invoiceNumber}</div>
+                </div>
+              </div>
+            </div>
+
+            ${contractInfo}
+
+            <div class="section-title">\ud074\ub77c\uc774\uc5b8\ud2b8 \uc815\ubcf4 / Client Information</div>
+            <div class="info-grid">
+              <div class="info-box">
+                <div class="info-label">\ud074\ub77c\uc774\uc5b8\ud2b8 / Bill To</div>
+                <div class="info-value">${invoice.customer}</div>
+              </div>
+              <div>
+                <div class="info-box" style="margin-bottom: 10px;">
+                  <div class="info-label">\ubc1c\ud589\uc77c / Issue Date</div>
+                  <div class="info-value">${invoice.issueDate}</div>
+                </div>
+                <div class="info-box">
+                  <div class="info-label">\ub0a9\ubd80\uae30\ud55c / Due Date</div>
+                  <div class="info-value">${invoice.dueDate}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-title">\ud488\ubaa9 \uc0c1\uc138 / Invoice Details</div>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 50%;">Item / \ud488\ubaa9</th>
+                  <th class="text-right" style="width: 15%;">Qty / \uc218\ub7c9</th>
+                  <th class="text-right" style="width: 17.5%;">Unit Price / \ub2e8\uac00</th>
+                  <th class="text-right" style="width: 17.5%;">Amount / \uae08\uc561</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${invoice.items.map(item => `
+                  <tr>
+                    <td style="font-weight: 600;">${item.name}</td>
+                    <td class="text-right">${item.quantity} ${item.unit}</td>
+                    <td class="text-right">\u20a9${new Intl.NumberFormat('ko-KR').format(item.unitPrice)}</td>
+                    <td class="text-right" style="color: #f97316; font-weight: 700;">\u20a9${new Intl.NumberFormat('ko-KR').format(item.quantity * item.unitPrice)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+
+            <div class="total-section">
+              <div class="total-row">
+                <div class="total-label">Subtotal / \uc18c\uacc4:</div>
+                <div class="total-value">\u20a9${new Intl.NumberFormat('ko-KR').format(invoice.subtotal)}</div>
+              </div>
+              <div class="total-row">
+                <div class="total-label">Tax (10%) / \uc138\uae08 (10%):</div>
+                <div class="total-value">\u20a9${new Intl.NumberFormat('ko-KR').format(invoice.taxAmount)}</div>
+              </div>
+              <div class="total-row grand-total">
+                <div class="total-label">Grand Total / \ucd1d\uc561:</div>
+                <div class="total-value">\u20a9${new Intl.NumberFormat('ko-KR').format(invoice.totalAmount)}</div>
+              </div>
+            </div>
+
+            ${invoice.notes ? `
+              <div class="notes-section">
+                <div class="notes-title">\ud2b9\uae30\uc0ac\ud56d / Notes</div>
+                <div class="notes-text">${invoice.notes}</div>
+              </div>
+            ` : ''}
+
+            <div class="signature-section">
+              <div class="signature-box">
+                <div class="signature-label">\ubc1c\ud589\uc790 / Issued By</div>
+                <div style="height: 70px;"></div>
+                <div class="signature-line">\uc8fc\uc2dd\ud68c\uc0ac \uc81c\ub77c</div>
+              </div>
+              <div class="signature-box">
+                <div class="signature-label">\uc218\ub839\uc778 / Received By</div>
+                <div style="height: 70px;"></div>
+                <div class="signature-line">${invoice.customer}</div>
+              </div>
+            </div>
+
+            <div class="footer">
+              <div class="footer-logo">ZERA</div>
+              <p><strong>\uc774 \ubb38\uc11c\ub294 \uacf5\uc2dd \uccad\uad6c\uc11c\uc785\ub2c8\ub2e4 | This is an official invoice</strong></p>
+              <p style="margin-top: 5px;">Printed on ${new Date().toLocaleDateString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric'})} at ${new Date().toLocaleTimeString('ko-KR')}</p>
+              <p style="margin-top: 5px; color: #ccc;">\u00a9 2026 ZERA Co., Ltd. All rights reserved.</p>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          window.onload = function() { 
+            setTimeout(function() { window.print(); }, 250); 
+          }
+        </script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   const handleCreate = () => {
     const newId = Math.max(...invoices.map(inv => inv.id)) + 1;
     const subtotal = newInvoice.quantity * newInvoice.unitPrice;
@@ -84,10 +625,11 @@ export default function InvoicesPage() {
       taxAmount,
       totalAmount: subtotal + taxAmount,
       paymentStatus: 'unpaid',
-      notes: newInvoice.notes,
+      notes: `${newInvoice.notes}${newInvoice.notes ? ' | ' : ''}Payment Method: ${newInvoice.paymentMethod === 'bank_transfer' ? (locale === 'ko' ? 'Bank Transfer (계좌 이체)' : 'Bank Transfer') : (locale === 'ko' ? 'Credit Card (신용카드)' : 'Credit Card')}`,
+      salesContractNumber: salesContracts.find(c => c.id === Number(newInvoice.salesContractId))?.contractNumber,
     }]);
     setIsAddModalOpen(false);
-    setNewInvoice({ customer: '', issueDate: '2026-02-15', dueDate: '', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, notes: '' });
+    setNewInvoice({ salesContractId: '', customer: '', issueDate: '2026-02-15', dueDate: '', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, notes: '', paymentMethod: 'bank_transfer' });
   };
 
   return (
@@ -166,8 +708,9 @@ export default function InvoicesPage() {
                     <td className="px-6 py-4 text-center">{paymentBadge(inv.paymentStatus)}</td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => setSelectedInvoice(inv)} className="text-orange-500 hover:text-orange-700"><Eye className="w-4 h-4" /></button>
-                        <button onClick={() => handleDelete(inv.id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => setSelectedInvoice(inv)} className="text-orange-500 hover:text-orange-700" title={locale === 'ko' ? '상세보기' : 'View Details'}><Eye className="w-4 h-4" /></button>
+                        <button onClick={() => handlePrint(inv)} className="text-blue-500 hover:text-blue-700" title={locale === 'ko' ? '인쇄' : 'Print'}><Printer className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(inv.id)} className="text-red-500 hover:text-red-700" title={locale === 'ko' ? '삭제' : 'Delete'}><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>
@@ -241,7 +784,24 @@ export default function InvoicesPage() {
               <button onClick={() => setIsAddModalOpen(false)} className="text-white/80 hover:text-white"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-6 space-y-4">
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.customer}</label><input value={newInvoice.customer} onChange={e => setNewInvoice({ ...newInvoice, customer: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500" /></div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '판매 계약 선택' : 'Select Sales Contract'}</label>
+                <select 
+                  value={newInvoice.salesContractId} 
+                  onChange={e => handleContractSelect(e.target.value)} 
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500"
+                >
+                  <option value="">{locale === 'ko' ? '-- 판매 계약 선택 --' : '-- Select Sales Contract --'}</option>
+                  <optgroup label={locale === 'ko' ? '🇰🇷 국내 시장 (Domestic Market)' : '🇰🇷 Domestic Market (Korea)'}>
+                    {salesContracts.filter(c => c.market === 'domestic').map(contract => (
+                      <option key={contract.id} value={contract.id}>
+                        {contract.contractNumber} | {contract.buyer} | {contract.productName}
+                      </option>
+                    ))}
+                  </optgroup>
+                </select>
+              </div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.customer}</label><input value={newInvoice.customer} onChange={e => setNewInvoice({ ...newInvoice, customer: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 bg-gray-50" readOnly /></div>
               <div className="grid grid-cols-2 gap-4">
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.issueDate}</label><input type="date" value={newInvoice.issueDate} onChange={e => setNewInvoice({ ...newInvoice, issueDate: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500" /></div>
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.duePaymentDate}</label><input type="date" value={newInvoice.dueDate} onChange={e => setNewInvoice({ ...newInvoice, dueDate: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500" /></div>
@@ -257,6 +817,45 @@ export default function InvoicesPage() {
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.unitPrice}</label><input type="number" value={newInvoice.unitPrice} onChange={e => setNewInvoice({ ...newInvoice, unitPrice: Number(e.target.value) })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500" /></div>
               </div>
               <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '비고' : 'Notes'}</label><textarea value={newInvoice.notes} onChange={e => setNewInvoice({ ...newInvoice, notes: e.target.value })} rows={2} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500" /></div>
+              
+              {/* Payment Method Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  {locale === 'ko' ? '결제 방법' : 'Payment Method'}
+                </label>
+                <div className="space-y-3">
+                  <label className="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="bank_transfer"
+                      checked={newInvoice.paymentMethod === 'bank_transfer'}
+                      onChange={(e) => setNewInvoice({ ...newInvoice, paymentMethod: e.target.value })}
+                      className="mr-3 text-orange-500"
+                    />
+                    <Banknote className="w-5 h-5 text-blue-500 mr-3" />
+                    <span className="text-sm font-medium">
+                      {locale === 'ko' ? '계좌 이체 (Bank Transfer)' : 'Bank Transfer'}
+                    </span>
+                  </label>
+                  
+                  <label className="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="credit_card"
+                      checked={newInvoice.paymentMethod === 'credit_card'}
+                      onChange={(e) => setNewInvoice({ ...newInvoice, paymentMethod: e.target.value })}
+                      className="mr-3 text-orange-500"
+                    />
+                    <CreditCard className="w-5 h-5 text-purple-500 mr-3" />
+                    <span className="text-sm font-medium">
+                      {locale === 'ko' ? '신용카드 (Credit Card)' : 'Credit Card'}
+                    </span>
+                  </label>
+                </div>
+              </div>
+              
               <div className="flex justify-end gap-3 pt-4">
                 <button onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">{t.cancel}</button>
                 <button onClick={handleCreate} className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg">{t.save}</button>

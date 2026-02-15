@@ -5,7 +5,23 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from '@/lib/LocaleContext';
 import { translations } from '@/lib/translations';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { ArrowLeft, Receipt, Plus, Search, Eye, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Receipt, Plus, Search, Eye, Trash2, X, Printer } from 'lucide-react';
+
+interface Invoice {
+  id: number;
+  invoiceNumber: string;
+  customer: string;
+  issueDate: string;
+  dueDate: string;
+  items: { name: string; quantity: number; unit: string; unitPrice: number }[];
+  subtotal: number;
+  taxRate: number;
+  taxAmount: number;
+  totalAmount: number;
+  paymentStatus: 'paid' | 'unpaid' | 'partial' | 'overdue';
+  notes: string;
+  salesContractNumber?: string;
+}
 
 interface TaxInvoice {
   id: number;
@@ -19,6 +35,7 @@ interface TaxInvoice {
   items: { name: string; quantity: number; unit: string; unitPrice: number }[];
   paymentStatus: 'paid' | 'unpaid' | 'partial' | 'overdue';
   type: 'sales' | 'purchase';
+  invoiceNumber?: string;
 }
 
 export default function TaxInvoicesPage() {
@@ -31,22 +48,59 @@ export default function TaxInvoicesPage() {
   const [selectedInvoice, setSelectedInvoice] = useState<TaxInvoice | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
+  // Invoices from Invoice System
+  const [availableInvoices] = useState<Invoice[]>([
+    { id: 1, invoiceNumber: 'INV-2026-001', customer: 'Brunei Energy Corp', issueDate: '2026-02-15', dueDate: '2026-03-15', items: [{ name: 'Solar Inverter SI-5000', quantity: 20, unit: 'pcs', unitPrice: 3500000 }], subtotal: 70000000, taxRate: 10, taxAmount: 7000000, totalAmount: 77000000, paymentStatus: 'paid', notes: 'Payment received via wire transfer' },
+    { id: 2, invoiceNumber: 'INV-2026-002', customer: 'Thailand Power Solutions', issueDate: '2026-02-14', dueDate: '2026-03-14', items: [{ name: 'Energy Saver Module ESM-200', quantity: 100, unit: 'pcs', unitPrice: 850000 }], subtotal: 85000000, taxRate: 10, taxAmount: 8500000, totalAmount: 93500000, paymentStatus: 'partial', notes: '50% deposit received' },
+    { id: 3, invoiceNumber: 'INV-2026-003', customer: 'Vietnam Green Tech', issueDate: '2026-02-13', dueDate: '2026-03-13', items: [{ name: 'LED Controller LC-300', quantity: 500, unit: 'pcs', unitPrice: 120000 }], subtotal: 60000000, taxRate: 10, taxAmount: 6000000, totalAmount: 66000000, paymentStatus: 'unpaid', notes: '' },
+    { id: 4, invoiceNumber: 'INV-2026-004', customer: 'Seoul Metro', issueDate: '2026-02-12', dueDate: '2026-03-12', items: [{ name: 'Power Distribution Unit PDU-1000', quantity: 30, unit: 'pcs', unitPrice: 4200000 }], subtotal: 126000000, taxRate: 10, taxAmount: 12600000, totalAmount: 138600000, paymentStatus: 'paid', notes: '' },
+    { id: 5, invoiceNumber: 'INV-2026-005', customer: 'Busan Port Authority', issueDate: '2026-02-11', dueDate: '2026-02-25', items: [{ name: 'Industrial Battery IB-500', quantity: 50, unit: 'pcs', unitPrice: 2800000 }], subtotal: 140000000, taxRate: 10, taxAmount: 14000000, totalAmount: 154000000, paymentStatus: 'overdue', notes: 'Payment reminder sent' },
+    { id: 6, invoiceNumber: 'INV-2026-006', customer: 'Incheon Airport Corp', issueDate: '2026-02-10', dueDate: '2026-03-10', items: [{ name: 'Smart Grid Controller SGC-100', quantity: 15, unit: 'pcs', unitPrice: 8500000 }], subtotal: 127500000, taxRate: 10, taxAmount: 12750000, totalAmount: 140250000, paymentStatus: 'unpaid', notes: '' },
+    { id: 7, invoiceNumber: 'INV-2026-007', customer: 'Jeju Energy Co', issueDate: '2026-02-09', dueDate: '2026-03-09', items: [{ name: 'Wind Turbine Controller WTC-50', quantity: 5, unit: 'pcs', unitPrice: 15000000 }], subtotal: 75000000, taxRate: 10, taxAmount: 7500000, totalAmount: 82500000, paymentStatus: 'paid', notes: '' },
+    { id: 8, invoiceNumber: 'INV-2026-008', customer: 'KT Telecom', issueDate: '2026-02-08', dueDate: '2026-03-08', items: [{ name: 'UPS System UPS-3000', quantity: 25, unit: 'pcs', unitPrice: 6200000 }], subtotal: 155000000, taxRate: 10, taxAmount: 15500000, totalAmount: 170500000, paymentStatus: 'paid', notes: '' },
+    { id: 9, invoiceNumber: 'INV-2026-009', customer: 'Daegu Industrial Zone', issueDate: '2026-02-07', dueDate: '2026-03-07', items: [{ name: 'Voltage Regulator VR-200', quantity: 80, unit: 'pcs', unitPrice: 950000 }], subtotal: 76000000, taxRate: 10, taxAmount: 7600000, totalAmount: 83600000, paymentStatus: 'unpaid', notes: '' },
+    { id: 10, invoiceNumber: 'INV-2026-010', customer: 'Gwangju Solar Farm', issueDate: '2026-02-06', dueDate: '2026-03-06', items: [{ name: 'Solar Panel SP-400W', quantity: 300, unit: 'pcs', unitPrice: 350000 }], subtotal: 105000000, taxRate: 10, taxAmount: 10500000, totalAmount: 115500000, paymentStatus: 'partial', notes: '30% advance paid' },
+  ]);
+
   const [invoices, setInvoices] = useState<TaxInvoice[]>([
-    { id: 1, taxInvoiceNumber: 'TAX-2026-001', customer: 'Brunei Energy Corp', businessNumber: '123-45-67890', issueDate: '2026-02-15', supplyAmount: 70000000, taxAmount: 7000000, totalAmount: 77000000, items: [{ name: 'Solar Inverter SI-5000', quantity: 20, unit: 'pcs', unitPrice: 3500000 }], paymentStatus: 'paid', type: 'sales' },
+    { id: 1, taxInvoiceNumber: 'TAX-2026-001', customer: 'Brunei Energy Corp', businessNumber: '123-45-67890', issueDate: '2026-02-15', supplyAmount: 70000000, taxAmount: 7000000, totalAmount: 77000000, items: [{ name: 'Solar Inverter SI-5000', quantity: 20, unit: 'pcs', unitPrice: 3500000 }], paymentStatus: 'paid', type: 'sales', invoiceNumber: 'INV-2026-001' },
     { id: 2, taxInvoiceNumber: 'TAX-2026-002', customer: 'Samsung Electronics', businessNumber: '234-56-78901', issueDate: '2026-02-14', supplyAmount: 28900000, taxAmount: 2890000, totalAmount: 31790000, items: [{ name: 'LED Module A100', quantity: 500, unit: 'pcs', unitPrice: 45000 }], paymentStatus: 'paid', type: 'purchase' },
-    { id: 3, taxInvoiceNumber: 'TAX-2026-003', customer: 'Thailand Power Solutions', businessNumber: '345-67-89012', issueDate: '2026-02-13', supplyAmount: 85000000, taxAmount: 8500000, totalAmount: 93500000, items: [{ name: 'Energy Saver Module ESM-200', quantity: 100, unit: 'pcs', unitPrice: 850000 }], paymentStatus: 'partial', type: 'sales' },
+    { id: 3, taxInvoiceNumber: 'TAX-2026-003', customer: 'Thailand Power Solutions', businessNumber: '345-67-89012', issueDate: '2026-02-13', supplyAmount: 85000000, taxAmount: 8500000, totalAmount: 93500000, items: [{ name: 'Energy Saver Module ESM-200', quantity: 100, unit: 'pcs', unitPrice: 850000 }], paymentStatus: 'partial', type: 'sales', invoiceNumber: 'INV-2026-002' },
     { id: 4, taxInvoiceNumber: 'TAX-2026-004', customer: 'LG Chem', businessNumber: '456-78-90123', issueDate: '2026-02-12', supplyAmount: 15000000, taxAmount: 1500000, totalAmount: 16500000, items: [{ name: 'Battery Cell 3.7V', quantity: 1000, unit: 'pcs', unitPrice: 15000 }], paymentStatus: 'unpaid', type: 'purchase' },
-    { id: 5, taxInvoiceNumber: 'TAX-2026-005', customer: 'Seoul Metro', businessNumber: '567-89-01234', issueDate: '2026-02-11', supplyAmount: 126000000, taxAmount: 12600000, totalAmount: 138600000, items: [{ name: 'Power Distribution Unit PDU-1000', quantity: 30, unit: 'pcs', unitPrice: 4200000 }], paymentStatus: 'paid', type: 'sales' },
+    { id: 5, taxInvoiceNumber: 'TAX-2026-005', customer: 'Seoul Metro', businessNumber: '567-89-01234', issueDate: '2026-02-11', supplyAmount: 126000000, taxAmount: 12600000, totalAmount: 138600000, items: [{ name: 'Power Distribution Unit PDU-1000', quantity: 30, unit: 'pcs', unitPrice: 4200000 }], paymentStatus: 'paid', type: 'sales', invoiceNumber: 'INV-2026-004' },
     { id: 6, taxInvoiceNumber: 'TAX-2026-006', customer: 'SK Hynix', businessNumber: '678-90-12345', issueDate: '2026-02-10', supplyAmount: 8400000, taxAmount: 840000, totalAmount: 9240000, items: [{ name: 'Memory Chip 8GB', quantity: 300, unit: 'pcs', unitPrice: 28000 }], paymentStatus: 'overdue', type: 'purchase' },
-    { id: 7, taxInvoiceNumber: 'TAX-2026-007', customer: 'Vietnam Green Tech', businessNumber: '789-01-23456', issueDate: '2026-02-09', supplyAmount: 60000000, taxAmount: 6000000, totalAmount: 66000000, items: [{ name: 'LED Controller LC-300', quantity: 500, unit: 'pcs', unitPrice: 120000 }], paymentStatus: 'unpaid', type: 'sales' },
+    { id: 7, taxInvoiceNumber: 'TAX-2026-007', customer: 'Vietnam Green Tech', businessNumber: '789-01-23456', issueDate: '2026-02-09', supplyAmount: 60000000, taxAmount: 6000000, totalAmount: 66000000, items: [{ name: 'LED Controller LC-300', quantity: 500, unit: 'pcs', unitPrice: 120000 }], paymentStatus: 'unpaid', type: 'sales', invoiceNumber: 'INV-2026-003' },
     { id: 8, taxInvoiceNumber: 'TAX-2026-008', customer: 'Hyundai Steel', businessNumber: '890-12-34567', issueDate: '2026-02-08', supplyAmount: 12750000, taxAmount: 1275000, totalAmount: 14025000, items: [{ name: 'Steel Frame LK-200', quantity: 150, unit: 'pcs', unitPrice: 85000 }], paymentStatus: 'paid', type: 'purchase' },
-    { id: 9, taxInvoiceNumber: 'TAX-2026-009', customer: 'KT Telecom', businessNumber: '901-23-45678', issueDate: '2026-02-07', supplyAmount: 155000000, taxAmount: 15500000, totalAmount: 170500000, items: [{ name: 'UPS System UPS-3000', quantity: 25, unit: 'pcs', unitPrice: 6200000 }], paymentStatus: 'paid', type: 'sales' },
+    { id: 9, taxInvoiceNumber: 'TAX-2026-009', customer: 'KT Telecom', businessNumber: '901-23-45678', issueDate: '2026-02-07', supplyAmount: 155000000, taxAmount: 15500000, totalAmount: 170500000, items: [{ name: 'UPS System UPS-3000', quantity: 25, unit: 'pcs', unitPrice: 6200000 }], paymentStatus: 'paid', type: 'sales', invoiceNumber: 'INV-2026-008' },
     { id: 10, taxInvoiceNumber: 'TAX-2026-010', customer: 'Hanwha Solutions', businessNumber: '012-34-56789', issueDate: '2026-02-06', supplyAmount: 36000000, taxAmount: 3600000, totalAmount: 39600000, items: [{ name: 'Solar Panel 350W', quantity: 200, unit: 'pcs', unitPrice: 180000 }], paymentStatus: 'partial', type: 'purchase' },
   ]);
 
   const [newInvoice, setNewInvoice] = useState({
-    customer: '', businessNumber: '', issueDate: '2026-02-15', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, type: 'sales' as 'sales' | 'purchase',
+    invoiceId: '', invoiceNumber: '', customer: '', businessNumber: '', issueDate: '2026-02-15', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, type: 'sales' as 'sales' | 'purchase',
   });
+
+  const handleInvoiceSelect = (invoiceId: string) => {
+    if (!invoiceId) {
+      setNewInvoice({ invoiceId: '', invoiceNumber: '', customer: '', businessNumber: '', issueDate: '2026-02-15', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, type: 'sales' });
+      return;
+    }
+    const selectedInv = availableInvoices.find(inv => inv.id === Number(invoiceId));
+    if (selectedInv) {
+      const firstItem = selectedInv.items[0];
+      setNewInvoice({
+        invoiceId,
+        invoiceNumber: selectedInv.invoiceNumber,
+        customer: selectedInv.customer,
+        businessNumber: '123-45-67890', // Default business number
+        issueDate: selectedInv.issueDate,
+        itemName: firstItem.name,
+        quantity: firstItem.quantity,
+        unit: firstItem.unit,
+        unitPrice: firstItem.unitPrice,
+        type: 'sales',
+      });
+    }
+  };
 
   const formatCurrency = (v: number) => '₩' + new Intl.NumberFormat(locale === 'ko' ? 'ko-KR' : 'en-US').format(v);
 
@@ -66,7 +120,8 @@ export default function TaxInvoicesPage() {
     const matchSearch = inv.taxInvoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) || inv.customer.toLowerCase().includes(searchTerm.toLowerCase());
     const matchStatus = statusFilter === 'all' || inv.paymentStatus === statusFilter;
     const matchType = typeFilter === 'all' || inv.type === typeFilter;
-    return matchSearch && matchStatus && matchType;
+    const isPaid = inv.paymentStatus === 'paid'; // Only show paid invoices
+    return matchSearch && matchStatus && matchType && isPaid;
   });
 
   const handleDelete = (id: number) => {
@@ -91,9 +146,183 @@ export default function TaxInvoicesPage() {
       items: [{ name: newInvoice.itemName, quantity: newInvoice.quantity, unit: newInvoice.unit, unitPrice: newInvoice.unitPrice }],
       paymentStatus: 'unpaid',
       type: newInvoice.type,
+      invoiceNumber: newInvoice.invoiceNumber,
     }]);
     setIsAddModalOpen(false);
-    setNewInvoice({ customer: '', businessNumber: '', issueDate: '2026-02-15', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, type: 'sales' });
+    setNewInvoice({ invoiceId: '', invoiceNumber: '', customer: '', businessNumber: '', issueDate: '2026-02-15', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0, type: 'sales' });
+  };
+
+  const handlePrint = (inv: TaxInvoice) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>${inv.taxInvoiceNumber} - ${locale === 'ko' ? '세금계산서' : 'Tax Invoice'}</title>
+          <style>
+            @page { size: A4; margin: 0; }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: white; padding: 12mm; color: #1a1a1a; }
+            @media print {
+              body { padding: 8mm; }
+            }
+            .container { background: white; max-width: 210mm; margin: 0 auto; padding: 18px; }
+            .header { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); padding: 16px; border-radius: 10px 10px 0 0; color: white; display: flex; align-items: center; justify-content: space-between; }
+            .logo-section { display: flex; align-items: center; gap: 12px; }
+            .logo { width: 60px; height: 60px; background: white; border-radius: 8px; padding: 8px; object-fit: contain; object-position: center; }
+            .company-name { font-size: 20px; font-weight: 900; letter-spacing: 1px; }
+            .company-name-en { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.95); margin-bottom: 6px; letter-spacing: 0.8px; }
+            .company-info { font-size: 10px; color: #000000; line-height: 1.5; background: rgba(255,255,255,0.92); padding: 10px 12px; border-radius: 6px; margin-top: 8px; }
+            .tax-invoice-badge { background: white; padding: 10px 15px; border-radius: 6px; text-align: right; box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+            .tax-invoice-title { font-size: 20px; font-weight: 900; color: #dc2626; margin-bottom: 4px; }
+            .tax-invoice-title-en { font-size: 11px; color: #666; font-weight: 600; }
+            .tax-invoice-number { font-size: 14px; color: #dc2626; font-weight: 800; margin-top: 6px; }
+            .info-section { margin-top: 18px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .info-box { background: linear-gradient(to right, #fef2f2 0%, #fee2e2 100%); padding: 12px; border-radius: 8px; border-left: 4px solid #dc2626; }
+            .info-label { font-size: 9px; color: #666; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+            .info-value { font-size: 13px; font-weight: 700; color: #1a1a1a; }
+            .items-section { margin-top: 18px; }
+            .section-title { font-size: 13px; font-weight: 800; color: #1a1a1a; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 3px solid #dc2626; }
+            .items-table { width: 100%; border-collapse: collapse; margin-top: 10px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+            .items-table thead { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; }
+            .items-table th { padding: 10px 12px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+            .items-table th.text-right { text-align: right; }
+            .items-table tbody tr { background: white; }
+            .items-table tbody tr:nth-child(even) { background: #fef2f2; }
+            .items-table td { padding: 10px 12px; font-size: 11px; color: #333; border-bottom: 1px solid #fee2e2; }
+            .items-table td.text-right { text-align: right; font-weight: 600; }
+            .total-section { margin-top: 18px; background: linear-gradient(to right, #fef2f2 0%, #fee2e2 100%); padding: 14px; border-radius: 8px; }
+            .total-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 11px; }
+            .total-label { color: #666; font-weight: 600; }
+            .total-value { font-weight: 700; color: #1a1a1a; font-size: 12px; }
+            .grand-total { margin-top: 10px; padding: 12px; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+            .grand-total-label { color: white; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; }
+            .grand-total-value { color: white; font-size: 18px; font-weight: 900; }
+            .signature-section { margin-top: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+            .signature-box { border: 2px solid #fee2e2; padding: 14px; border-radius: 8px; background: #fefefe; }
+            .signature-label { font-size: 11px; color: #666; margin-bottom: 8px; font-weight: 600; }
+            .signature-area { height: 60px; border-bottom: 2px solid #e5e7eb; margin-bottom: 8px; }
+            .signature-name { font-size: 10px; color: #999; text-align: center; }
+            .footer { margin-top: 20px; padding-top: 14px; border-top: 2px solid #fee2e2; text-align: center; color: #999; font-size: 9px; line-height: 1.6; }
+            .print-date { color: #666; font-weight: 600; margin-bottom: 4px; }
+            @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="logo-section">
+                <img src="/kenergysave-logo.avif" alt="Company Logo" class="logo">
+                <div>
+                  <div class="company-name">주식회사 제라</div>
+                  <div class="company-name-en">ZERA Co., Ltd</div>
+                  <div class="company-info">
+                    <strong>주소:</strong> 경기도 군포시 엘에스로166번길 16-10, 2층<br>
+                    <strong>Address:</strong> 2F, 16-10, 166beon-gil, Elseso-ro, Gunpo-si, Gyeonggi-do, Korea<br>
+                    <strong>전화 / Tel:</strong> +82 31-427-1380 | <strong>이메일 / Email:</strong> info@zera-energy.com<br>
+                    <strong>Website:</strong> www.zera-energy.com
+                  </div>
+                </div>
+              </div>
+              <div class="tax-invoice-badge">
+                <div class="tax-invoice-title">${locale === 'ko' ? '세금계산서' : 'TAX INVOICE'}</div>
+                <div class="tax-invoice-title-en">${locale === 'ko' ? 'Tax Invoice' : '세금계산서'}</div>
+                <div class="tax-invoice-number">${inv.taxInvoiceNumber}</div>
+              </div>
+            </div>
+
+            <div class="info-section">
+              <div class="info-box">
+                <div class="info-label">${locale === 'ko' ? '거래처' : 'Company'} / ${locale === 'ko' ? 'Company' : '거래처'}</div>
+                <div class="info-value">${inv.customer}</div>
+              </div>
+              <div class="info-box">
+                <div class="info-label">${locale === 'ko' ? '사업자번호' : 'Business No.'} / ${locale === 'ko' ? 'Business No.' : '사업자번호'}</div>
+                <div class="info-value">${inv.businessNumber}</div>
+              </div>
+              <div class="info-box">
+                <div class="info-label">${locale === 'ko' ? '발행일' : 'Issue Date'} / ${locale === 'ko' ? 'Issue Date' : '발행일'}</div>
+                <div class="info-value">${inv.issueDate}</div>
+              </div>
+              <div class="info-box">
+                <div class="info-label">${locale === 'ko' ? '유형' : 'Type'} / ${locale === 'ko' ? 'Type' : '유형'}</div>
+                <div class="info-value">${inv.type === 'sales' ? (locale === 'ko' ? '매출' : 'Sales') : (locale === 'ko' ? '매입' : 'Purchase')}</div>
+              </div>
+            </div>
+
+            <div class="items-section">
+              <div class="section-title">${locale === 'ko' ? '거래 내역' : 'Transaction Details'} / ${locale === 'ko' ? 'Transaction Details' : '거래 내역'}</div>
+              <table class="items-table">
+                <thead>
+                  <tr>
+                    <th>${locale === 'ko' ? '품목' : 'Item'}</th>
+                    <th class="text-right">${locale === 'ko' ? '수량' : 'Quantity'}</th>
+                    <th class="text-right">${locale === 'ko' ? '단위' : 'Unit'}</th>
+                    <th class="text-right">${locale === 'ko' ? '단가' : 'Unit Price'}</th>
+                    <th class="text-right">${locale === 'ko' ? '금액' : 'Amount'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${inv.items.map(item => `
+                    <tr>
+                      <td>${item.name}</td>
+                      <td class="text-right">${item.quantity.toLocaleString()}</td>
+                      <td class="text-right">${item.unit}</td>
+                      <td class="text-right">${formatCurrency(item.unitPrice)}</td>
+                      <td class="text-right">${formatCurrency(item.quantity * item.unitPrice)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="total-section">
+              <div class="total-row">
+                <span class="total-label">${locale === 'ko' ? '공급가액' : 'Supply Amount'} / ${locale === 'ko' ? 'Supply Amount' : '공급가액'}</span>
+                <span class="total-value">${formatCurrency(inv.supplyAmount)}</span>
+              </div>
+              <div class="total-row">
+                <span class="total-label">${locale === 'ko' ? '부가세' : 'VAT'} (10%) / ${locale === 'ko' ? 'VAT' : '부가세'} (10%)</span>
+                <span class="total-value">${formatCurrency(inv.taxAmount)}</span>
+              </div>
+              <div class="grand-total">
+                <span class="grand-total-label">${locale === 'ko' ? '합계 금액' : 'Grand Total'} / ${locale === 'ko' ? 'Grand Total' : '합계 금액'}</span>
+                <span class="grand-total-value">${formatCurrency(inv.totalAmount)}</span>
+              </div>
+            </div>
+
+            <div class="signature-section">
+              <div class="signature-box">
+                <div class="signature-label">${locale === 'ko' ? '발행인' : 'Issued By'} / ${locale === 'ko' ? 'Issued By' : '발행인'}</div>
+                <div class="signature-area"></div>
+                <div class="signature-name">${locale === 'ko' ? '(서명 또는 인)' : '(Signature or Seal)'}</div>
+              </div>
+              <div class="signature-box">
+                <div class="signature-label">${locale === 'ko' ? '수령인' : 'Received By'} / ${locale === 'ko' ? 'Received By' : '수령인'}</div>
+                <div class="signature-area"></div>
+                <div class="signature-name">${locale === 'ko' ? '(서명 또는 인)' : '(Signature or Seal)'}</div>
+              </div>
+            </div>
+
+            <div class="footer">
+              <div class="print-date">${locale === 'ko' ? '출력일시' : 'Print Date'}: ${new Date().toLocaleString(locale === 'ko' ? 'ko-KR' : 'en-US')}</div>
+              <div>${locale === 'ko' ? '본 세금계산서는 전자문서로 법적 효력을 가집니다.' : 'This tax invoice is valid as an electronic document with legal effect.'}</div>
+              <div>© ${new Date().getFullYear()} ZERA Co., Ltd. All rights reserved.</div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+    };
   };
 
   return (
@@ -179,8 +408,9 @@ export default function TaxInvoicesPage() {
                     <td className="px-4 py-4 text-center">{paymentBadge(inv.paymentStatus)}</td>
                     <td className="px-4 py-4 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button onClick={() => setSelectedInvoice(inv)} className="text-red-500 hover:text-red-700"><Eye className="w-4 h-4" /></button>
-                        <button onClick={() => handleDelete(inv.id)} className="text-red-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => setSelectedInvoice(inv)} className="text-red-500 hover:text-red-700" title={locale === 'ko' ? '상세보기' : 'View Details'}><Eye className="w-4 h-4" /></button>
+                        <button onClick={() => handlePrint(inv)} className="text-green-500 hover:text-green-700" title={locale === 'ko' ? '인쇄' : 'Print'}><Printer className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(inv.id)} className="text-red-400 hover:text-red-600" title={locale === 'ko' ? '삭제' : 'Delete'}><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>
@@ -249,26 +479,27 @@ export default function TaxInvoicesPage() {
               <button onClick={() => setIsAddModalOpen(false)} className="text-white/80 hover:text-white"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-6 space-y-4">
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '유형' : 'Type'}</label>
-                <select value={newInvoice.type} onChange={e => setNewInvoice({ ...newInvoice, type: e.target.value as 'sales' | 'purchase' })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500">
-                  <option value="sales">{locale === 'ko' ? '매출' : 'Sales'}</option>
-                  <option value="purchase">{locale === 'ko' ? '매입' : 'Purchase'}</option>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '세금계산서 발행할 Invoice 선택' : 'Select Invoice for Tax Invoice'}</label>
+                <select value={newInvoice.invoiceId} onChange={e => handleInvoiceSelect(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500">
+                  <option value="">{locale === 'ko' ? 'Invoice 선택...' : 'Select Invoice...'}</option>
+                  {availableInvoices.map(inv => (
+                    <option key={inv.id} value={inv.id}>
+                      {inv.invoiceNumber} - {inv.customer} ({formatCurrency(inv.totalAmount)})
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '거래처' : 'Company'}</label><input value={newInvoice.customer} onChange={e => setNewInvoice({ ...newInvoice, customer: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '거래처' : 'Company'}</label><input value={newInvoice.customer} readOnly className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50" /></div>
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '사업자번호' : 'Business No.'}</label><input value={newInvoice.businessNumber} onChange={e => setNewInvoice({ ...newInvoice, businessNumber: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500" /></div>
               </div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.issueDate}</label><input type="date" value={newInvoice.issueDate} onChange={e => setNewInvoice({ ...newInvoice, issueDate: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500" /></div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '품목명' : 'Item Name'}</label><input value={newInvoice.itemName} onChange={e => setNewInvoice({ ...newInvoice, itemName: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500" /></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.issueDate}</label><input type="date" value={newInvoice.issueDate} readOnly className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50" /></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '품목명' : 'Item Name'}</label><input value={newInvoice.itemName} readOnly className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50" /></div>
               <div className="grid grid-cols-3 gap-4">
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.quantity}</label><input type="number" value={newInvoice.quantity} onChange={e => setNewInvoice({ ...newInvoice, quantity: Number(e.target.value) })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '단위' : 'Unit'}</label>
-                  <select value={newInvoice.unit} onChange={e => setNewInvoice({ ...newInvoice, unit: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500">
-                    <option value="pcs">pcs</option><option value="kg">kg</option><option value="sets">sets</option><option value="boxes">boxes</option>
-                  </select>
-                </div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.unitPrice}</label><input type="number" value={newInvoice.unitPrice} onChange={e => setNewInvoice({ ...newInvoice, unitPrice: Number(e.target.value) })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.quantity}</label><input type="number" value={newInvoice.quantity} readOnly className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '단위' : 'Unit'}</label><input value={newInvoice.unit} readOnly className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.unitPrice}</label><input type="number" value={newInvoice.unitPrice} readOnly className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50" /></div>
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">{t.cancel}</button>

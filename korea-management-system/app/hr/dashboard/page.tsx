@@ -8,7 +8,7 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 import CompanyLogo from '@/components/CompanyLogo';
 import {
   ShoppingCart,
-  ShoppingBag,
+  Award,
   FileText,
   Receipt,
   CreditCard,
@@ -18,6 +18,9 @@ import {
   ArrowLeft,
   BarChart3,
   Calendar,
+  ClipboardList,
+  History,
+  Briefcase,
 } from 'lucide-react';
 
 export default function HRDashboardPage() {
@@ -42,10 +45,10 @@ export default function HRDashboardPage() {
       count: 45,
     },
     {
-      icon: ShoppingBag,
+      icon: Award,
       title: t.salesOrders,
       description: t.salesOrdersDesc,
-      href: '/hr/sales-orders',
+      href: '/hr/Certificate',
       color: 'bg-green-500',
       count: 38,
     },
@@ -87,6 +90,38 @@ export default function HRDashboardPage() {
       description: t.expensesDesc,
       href: '/hr/expenses',
       color: 'bg-amber-500',
+      count: null,
+    },
+    {
+      icon: Users,
+      title: t.employeesByDepartment,
+      description: t.employeesByDepartmentDesc,
+      href: '/hr/employees-by-department',
+      color: 'bg-indigo-500',
+      count: null,
+    },
+    {
+      icon: DollarSign,
+      title: t.salaryPayments,
+      description: t.salaryPaymentsDesc,
+      href: '/hr/salary-payments',
+      color: 'bg-teal-500',
+      count: null,
+    },
+    {
+      icon: History,
+      title: t.employeeHistory,
+      description: t.employeeHistoryDesc,
+      href: '/hr/employee-history',
+      color: 'bg-violet-500',
+      count: null,
+    },
+    {
+      icon: Briefcase,
+      title: t.executiveOrders,
+      description: t.executiveOrdersDesc,
+      href: '/hr/executive-orders',
+      color: 'bg-pink-500',
       count: null,
     },
   ];

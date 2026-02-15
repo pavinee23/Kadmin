@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from '@/lib/LocaleContext';
 import { translations } from '@/lib/translations';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { ArrowLeft, ShoppingCart, Plus, Search, Eye, Trash2, X } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Plus, Search, Eye, Trash2, X, Upload, FileText } from 'lucide-react';
 
 interface PurchaseOrder {
   id: number;
@@ -17,6 +17,17 @@ interface PurchaseOrder {
   totalAmount: number;
   status: 'approved' | 'pending' | 'rejected' | 'cancelled';
   paymentStatus: 'paid' | 'unpaid' | 'partial' | 'overdue';
+  receiptFile?: string;
+  receiptFileName?: string;
+}
+
+interface Supplier {
+  id: number;
+  name: string;
+  contact: string;
+  phone: string;
+  email: string;
+  address: string;
 }
 
 export default function PurchaseOrdersPage() {
@@ -27,6 +38,15 @@ export default function PurchaseOrdersPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSupplierModalOpen, setIsSupplierModalOpen] = useState(false);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [receiptToView, setReceiptToView] = useState<{url: string, name: string} | null>(null);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([
+    { id: 1, name: 'Samsung Electronics', contact: 'Kim Min-soo', phone: '+82-2-2255-0114', email: 'contact@samsung.com', address: 'Seoul, South Korea' },
+    { id: 2, name: 'LG Chem', contact: 'Park Ji-won', phone: '+82-2-3773-1114', email: 'info@lgchem.com', address: 'Seoul, South Korea' },
+    { id: 3, name: 'SK Hynix', contact: 'Lee Sung-ho', phone: '+82-31-5185-0114', email: 'contact@skhynix.com', address: 'Icheon, South Korea' },
+  ]);
+  const [newSupplier, setNewSupplier] = useState({ name: '', contact: '', phone: '', email: '', address: '' });
 
   const [orders, setOrders] = useState<PurchaseOrder[]>([
     { id: 1, poNumber: 'PO-2026-001', supplier: 'Samsung Electronics', date: '2026-02-15', dueDate: '2026-03-15', items: [{ name: 'LED Module A100', quantity: 500, unit: 'pcs', unitPrice: 45000 }, { name: 'PCB Board X50', quantity: 200, unit: 'pcs', unitPrice: 32000 }], totalAmount: 28900000, status: 'approved', paymentStatus: 'paid' },
@@ -44,6 +64,7 @@ export default function PurchaseOrdersPage() {
   const [newOrder, setNewOrder] = useState({
     supplier: '', date: '2026-02-15', dueDate: '', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0,
   });
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
   const formatCurrency = (v: number) => '₩' + new Intl.NumberFormat(locale === 'ko' ? 'ko-KR' : 'en-US').format(v);
 
@@ -71,9 +92,20 @@ export default function PurchaseOrdersPage() {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setReceiptFile(e.target.files[0]);
+    }
+  };
+
   const handleCreate = () => {
     const newId = Math.max(...orders.map(o => o.id)) + 1;
     const total = newOrder.quantity * newOrder.unitPrice;
+    
+    // Simulate file upload (in real app, would upload to server)
+    const receiptFileUrl = receiptFile ? URL.createObjectURL(receiptFile) : undefined;
+    const receiptFileName = receiptFile ? receiptFile.name : undefined;
+    
     setOrders([...orders, {
       id: newId,
       poNumber: `PO-2026-${String(newId).padStart(3, '0')}`,
@@ -84,9 +116,25 @@ export default function PurchaseOrdersPage() {
       totalAmount: total,
       status: 'pending',
       paymentStatus: 'unpaid',
+      receiptFile: receiptFileUrl,
+      receiptFileName: receiptFileName,
     }]);
     setIsAddModalOpen(false);
     setNewOrder({ supplier: '', date: '2026-02-15', dueDate: '', itemName: '', quantity: 0, unit: 'pcs', unitPrice: 0 });
+    setReceiptFile(null);
+  };
+
+  const handleAddSupplier = () => {
+    const newId = Math.max(...suppliers.map(s => s.id)) + 1;
+    setSuppliers([...suppliers, { id: newId, ...newSupplier }]);
+    setIsSupplierModalOpen(false);
+    setNewSupplier({ name: '', contact: '', phone: '', email: '', address: '' });
+  };
+
+  const handleDeleteSupplier = (id: number) => {
+    if (confirm(locale === 'ko' ? '정말 삭제하시겠습니까?' : 'Are you sure you want to delete?')) {
+      setSuppliers(suppliers.filter(s => s.id !== id));
+    }
   };
 
   return (
@@ -130,6 +178,9 @@ export default function PurchaseOrdersPage() {
           </select>
           <button onClick={() => setIsAddModalOpen(true)} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
             <Plus className="w-4 h-4" />{t.addNew}
+          </button>
+          <button onClick={() => setIsSupplierModalOpen(true)} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+            <Plus className="w-4 h-4" />{locale === 'ko' ? 'Supplier' : 'Supplier'}
           </button>
         </div>
 
@@ -220,6 +271,98 @@ export default function PurchaseOrdersPage() {
               <div className="border-t pt-3 text-right">
                 <p className="text-lg font-bold">{t.grandTotal}: {formatCurrency(selectedOrder.totalAmount)}</p>
               </div>
+              
+              {/* Receipt File Display */}
+              {selectedOrder.receiptFileName && (
+                <div className="border-t pt-4 mt-4">
+                  <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-6 h-6 text-blue-600" />
+                      <div>
+                        <p className="text-sm font-semibold text-gray-700">{locale === 'ko' ? '첨부된 영수증' : 'Attached Receipt'}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{selectedOrder.receiptFileName}</p>
+                      </div>
+                    </div>
+                    {selectedOrder.receiptFile && (
+                      <button
+                        onClick={() => {
+                          setReceiptToView({url: selectedOrder.receiptFile!, name: selectedOrder.receiptFileName!});
+                          setIsReceiptModalOpen(true);
+                        }}
+                        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                      >
+                        <Eye className="w-4 h-4" />
+                        {locale === 'ko' ? '보기' : 'View'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Supplier Modal */}
+      {isSupplierModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-gradient-to-r from-green-600 to-green-800 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+              <h3 className="text-white font-bold text-lg">{locale === 'ko' ? 'Supplier 관리' : 'Supplier Management'}</h3>
+              <button onClick={() => setIsSupplierModalOpen(false)} className="text-white/80 hover:text-white"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-6">
+              {/* Add New Supplier Form */}
+              <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                <h4 className="font-semibold mb-3">{locale === 'ko' ? '새 Supplier 추가' : 'Add New Supplier'}</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '회사명' : 'Company Name'}</label><input value={newSupplier.name} onChange={e => setNewSupplier({ ...newSupplier, name: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500" placeholder="Samsung Electronics" /></div>
+                  <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '담당자' : 'Contact Person'}</label><input value={newSupplier.contact} onChange={e => setNewSupplier({ ...newSupplier, contact: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500" placeholder="Kim Min-soo" /></div>
+                  <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '전화번호' : 'Phone'}</label><input value={newSupplier.phone} onChange={e => setNewSupplier({ ...newSupplier, phone: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500" placeholder="+82-2-1234-5678" /></div>
+                  <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '이메일' : 'Email'}</label><input type="email" value={newSupplier.email} onChange={e => setNewSupplier({ ...newSupplier, email: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500" placeholder="contact@company.com" /></div>
+                  <div className="col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'ko' ? '주소' : 'Address'}</label><input value={newSupplier.address} onChange={e => setNewSupplier({ ...newSupplier, address: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500" placeholder="Seoul, South Korea" /></div>
+                </div>
+                <div className="flex justify-end mt-4">
+                  <button onClick={handleAddSupplier} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                    <Plus className="w-4 h-4" />{locale === 'ko' ? '추가' : 'Add'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Supplier List */}
+              <div>
+                <h4 className="font-semibold mb-3">{locale === 'ko' ? 'Supplier 목록' : 'Supplier List'} ({suppliers.length})</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">No.</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">{locale === 'ko' ? '회사명' : 'Company'}</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">{locale === 'ko' ? '담당자' : 'Contact'}</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">{locale === 'ko' ? '전화번호' : 'Phone'}</th>
+                        <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">{locale === 'ko' ? '이메일' : 'Email'}</th>
+                        <th className="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase">{locale === 'ko' ? '작업' : 'Actions'}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {suppliers.map((supplier, idx) => (
+                        <tr key={supplier.id} className="border-t hover:bg-gray-50">
+                          <td className="px-4 py-3">{idx + 1}</td>
+                          <td className="px-4 py-3 font-medium">{supplier.name}</td>
+                          <td className="px-4 py-3">{supplier.contact}</td>
+                          <td className="px-4 py-3">{supplier.phone}</td>
+                          <td className="px-4 py-3">{supplier.email}</td>
+                          <td className="px-4 py-3 text-center">
+                            <button onClick={() => handleDeleteSupplier(supplier.id)} className="text-red-600 hover:text-red-800">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -234,7 +377,12 @@ export default function PurchaseOrdersPage() {
               <button onClick={() => setIsAddModalOpen(false)} className="text-white/80 hover:text-white"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-6 space-y-4">
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.supplier}</label><input value={newOrder.supplier} onChange={e => setNewOrder({ ...newOrder, supplier: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" /></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.supplier}</label>
+                <select value={newOrder.supplier} onChange={e => setNewOrder({ ...newOrder, supplier: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                  <option value="">{locale === 'ko' ? '선택하세요' : 'Select Supplier'}</option>
+                  {suppliers.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                </select>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.date}</label><input type="date" value={newOrder.date} onChange={e => setNewOrder({ ...newOrder, date: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" /></div>
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.duePaymentDate}</label><input type="date" value={newOrder.dueDate} onChange={e => setNewOrder({ ...newOrder, dueDate: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" /></div>
@@ -249,10 +397,80 @@ export default function PurchaseOrdersPage() {
                 </div>
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.unitPrice}</label><input type="number" value={newOrder.unitPrice} onChange={e => setNewOrder({ ...newOrder, unitPrice: Number(e.target.value) })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500" /></div>
               </div>
+              
+              {/* Receipt Upload Section */}
+              <div className="border-t pt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    {locale === 'ko' ? 'บิル/ใบเสร็จรับเงิน (สแกน)' : 'Receipt/Bill (Scan)'}
+                  </div>
+                </label>
+                <div className="flex items-center gap-3">
+                  <label className="flex-1 cursor-pointer">
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-500 transition-colors">
+                      <div className="flex items-center justify-center gap-2 text-gray-600">
+                        <Upload className="w-5 h-5" />
+                        <span className="text-sm">
+                          {receiptFile ? receiptFile.name : (locale === 'ko' ? 'ไฟล์อัพโหลด (PDF, JPG, PNG)' : 'Upload File (PDF, JPG, PNG)')}
+                        </span>
+                      </div>
+                    </div>
+                    <input 
+                      type="file" 
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                  {receiptFile && (
+                    <button 
+                      onClick={() => setReceiptFile(null)} 
+                      className="text-red-600 hover:text-red-800"
+                      type="button"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+                {receiptFile && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    {locale === 'ko' ? '크기' : 'Size'}: {(receiptFile.size / 1024).toFixed(2)} KB
+                  </div>
+                )}
+              </div>
+              
               <div className="flex justify-end gap-3 pt-4">
                 <button onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">{t.cancel}</button>
                 <button onClick={handleCreate} className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">{t.save}</button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Receipt Preview Modal */}
+      {isReceiptModalOpen && receiptToView && (
+        <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4" onClick={() => setIsReceiptModalOpen(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileText className="w-6 h-6" />
+                <div>
+                  <h3 className="text-lg font-bold">{locale === 'ko' ? '영수증 미리보기' : 'Receipt Preview'}</h3>
+                  <p className="text-xs text-blue-100 mt-0.5">{receiptToView.name}</p>
+                </div>
+              </div>
+              <button onClick={() => setIsReceiptModalOpen(false)} className="p-2 hover:bg-white/20 rounded-lg transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto" style={{maxHeight: 'calc(95vh - 80px)'}}>
+              {receiptToView.name.toLowerCase().endsWith('.pdf') ? (
+                <iframe src={receiptToView.url} className="w-full h-[75vh] border rounded-lg" title="Receipt PDF" />
+              ) : (
+                <img src={receiptToView.url} alt="Receipt" className="w-full h-auto rounded-lg shadow-lg" />
+              )}
             </div>
           </div>
         </div>

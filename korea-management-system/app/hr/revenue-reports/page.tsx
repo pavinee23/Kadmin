@@ -7,6 +7,21 @@ import { translations } from '@/lib/translations';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { ArrowLeft, TrendingUp, Calendar, BarChart3 } from 'lucide-react';
 
+interface TaxInvoice {
+  id: number;
+  taxInvoiceNumber: string;
+  customer: string;
+  businessNumber: string;
+  issueDate: string;
+  supplyAmount: number;
+  taxAmount: number;
+  totalAmount: number;
+  items: { name: string; quantity: number; unit: string; unitPrice: number }[];
+  paymentStatus: 'paid' | 'unpaid' | 'partial' | 'overdue';
+  type: 'sales' | 'purchase';
+  invoiceNumber?: string;
+}
+
 export default function RevenueReportsPage() {
   const router = useRouter();
   const { locale } = useLocale();
@@ -15,46 +30,80 @@ export default function RevenueReportsPage() {
 
   const formatCurrency = (v: number) => '₩' + new Intl.NumberFormat(locale === 'ko' ? 'ko-KR' : 'en-US').format(v);
 
-  const dailyData = [
-    { date: '2026-02-15', sales: 45000000, returns: 2000000, net: 43000000 },
-    { date: '2026-02-14', sales: 38000000, returns: 1500000, net: 36500000 },
-    { date: '2026-02-13', sales: 52000000, returns: 3000000, net: 49000000 },
-    { date: '2026-02-12', sales: 41000000, returns: 500000, net: 40500000 },
-    { date: '2026-02-11', sales: 67000000, returns: 4000000, net: 63000000 },
-    { date: '2026-02-10', sales: 33000000, returns: 1000000, net: 32000000 },
-    { date: '2026-02-09', sales: 28000000, returns: 800000, net: 27200000 },
-    { date: '2026-02-08', sales: 55000000, returns: 2500000, net: 52500000 },
-    { date: '2026-02-07', sales: 48000000, returns: 1200000, net: 46800000 },
-    { date: '2026-02-06', sales: 62000000, returns: 3500000, net: 58500000 },
-    { date: '2026-02-05', sales: 39000000, returns: 900000, net: 38100000 },
-    { date: '2026-02-04', sales: 44000000, returns: 1600000, net: 42400000 },
-    { date: '2026-02-03', sales: 51000000, returns: 2200000, net: 48800000 },
-    { date: '2026-02-02', sales: 36000000, returns: 1300000, net: 34700000 },
-    { date: '2026-02-01', sales: 57000000, returns: 2800000, net: 54200000 },
-  ];
+  // Tax Invoices Data (from hr/tax-invoices - sales type only)
+  const [taxInvoices] = useState<TaxInvoice[]>([
+    { id: 1, taxInvoiceNumber: 'TAX-2026-001', customer: 'Brunei Energy Corp', businessNumber: '123-45-67890', issueDate: '2026-02-15', supplyAmount: 70000000, taxAmount: 7000000, totalAmount: 77000000, items: [{ name: 'Solar Inverter SI-5000', quantity: 20, unit: 'pcs', unitPrice: 3500000 }], paymentStatus: 'paid', type: 'sales', invoiceNumber: 'INV-2026-001' },
+    { id: 2, taxInvoiceNumber: 'TAX-2026-002', customer: 'Samsung Electronics', businessNumber: '234-56-78901', issueDate: '2026-02-14', supplyAmount: 28900000, taxAmount: 2890000, totalAmount: 31790000, items: [{ name: 'LED Module A100', quantity: 500, unit: 'pcs', unitPrice: 45000 }], paymentStatus: 'paid', type: 'purchase' },
+    { id: 3, taxInvoiceNumber: 'TAX-2026-003', customer: 'Thailand Power Solutions', businessNumber: '345-67-89012', issueDate: '2026-02-13', supplyAmount: 85000000, taxAmount: 8500000, totalAmount: 93500000, items: [{ name: 'Energy Saver Module ESM-200', quantity: 100, unit: 'pcs', unitPrice: 850000 }], paymentStatus: 'partial', type: 'sales', invoiceNumber: 'INV-2026-002' },
+    { id: 4, taxInvoiceNumber: 'TAX-2026-004', customer: 'LG Chem', businessNumber: '456-78-90123', issueDate: '2026-02-12', supplyAmount: 15000000, taxAmount: 1500000, totalAmount: 16500000, items: [{ name: 'Battery Cell 3.7V', quantity: 1000, unit: 'pcs', unitPrice: 15000 }], paymentStatus: 'unpaid', type: 'purchase' },
+    { id: 5, taxInvoiceNumber: 'TAX-2026-005', customer: 'Seoul Metro', businessNumber: '567-89-01234', issueDate: '2026-02-11', supplyAmount: 126000000, taxAmount: 12600000, totalAmount: 138600000, items: [{ name: 'Power Distribution Unit PDU-1000', quantity: 30, unit: 'pcs', unitPrice: 4200000 }], paymentStatus: 'paid', type: 'sales', invoiceNumber: 'INV-2026-004' },
+    { id: 6, taxInvoiceNumber: 'TAX-2026-006', customer: 'SK Hynix', businessNumber: '678-90-12345', issueDate: '2026-02-10', supplyAmount: 8400000, taxAmount: 840000, totalAmount: 9240000, items: [{ name: 'Memory Chip 8GB', quantity: 300, unit: 'pcs', unitPrice: 28000 }], paymentStatus: 'overdue', type: 'purchase' },
+    { id: 7, taxInvoiceNumber: 'TAX-2026-007', customer: 'Vietnam Green Tech', businessNumber: '789-01-23456', issueDate: '2026-02-09', supplyAmount: 60000000, taxAmount: 6000000, totalAmount: 66000000, items: [{ name: 'LED Controller LC-300', quantity: 500, unit: 'pcs', unitPrice: 120000 }], paymentStatus: 'unpaid', type: 'sales', invoiceNumber: 'INV-2026-003' },
+    { id: 8, taxInvoiceNumber: 'TAX-2026-008', customer: 'Hyundai Steel', businessNumber: '890-12-34567', issueDate: '2026-02-08', supplyAmount: 12750000, taxAmount: 1275000, totalAmount: 14025000, items: [{ name: 'Steel Frame LK-200', quantity: 150, unit: 'pcs', unitPrice: 85000 }], paymentStatus: 'paid', type: 'purchase' },
+    { id: 9, taxInvoiceNumber: 'TAX-2026-009', customer: 'KT Telecom', businessNumber: '901-23-45678', issueDate: '2026-02-07', supplyAmount: 155000000, taxAmount: 15500000, totalAmount: 170500000, items: [{ name: 'UPS System UPS-3000', quantity: 25, unit: 'pcs', unitPrice: 6200000 }], paymentStatus: 'paid', type: 'sales', invoiceNumber: 'INV-2026-008' },
+    { id: 10, taxInvoiceNumber: 'TAX-2026-010', customer: 'Hanwha Solutions', businessNumber: '012-34-56789', issueDate: '2026-02-06', supplyAmount: 36000000, taxAmount: 3600000, totalAmount: 39600000, items: [{ name: 'Solar Panel 350W', quantity: 200, unit: 'pcs', unitPrice: 180000 }], paymentStatus: 'partial', type: 'purchase' },
+  ]);
 
-  const monthlyData = [
-    { month: locale === 'ko' ? '2026년 2월' : 'Feb 2026', sales: 696000000, returns: 28800000, net: 667200000 },
-    { month: locale === 'ko' ? '2026년 1월' : 'Jan 2026', sales: 845000000, returns: 42000000, net: 803000000 },
-    { month: locale === 'ko' ? '2025년 12월' : 'Dec 2025', sales: 920000000, returns: 38000000, net: 882000000 },
-    { month: locale === 'ko' ? '2025년 11월' : 'Nov 2025', sales: 780000000, returns: 35000000, net: 745000000 },
-    { month: locale === 'ko' ? '2025년 10월' : 'Oct 2025', sales: 710000000, returns: 31000000, net: 679000000 },
-    { month: locale === 'ko' ? '2025년 9월' : 'Sep 2025', sales: 650000000, returns: 28000000, net: 622000000 },
-    { month: locale === 'ko' ? '2025년 8월' : 'Aug 2025', sales: 590000000, returns: 25000000, net: 565000000 },
-    { month: locale === 'ko' ? '2025년 7월' : 'Jul 2025', sales: 620000000, returns: 27000000, net: 593000000 },
-    { month: locale === 'ko' ? '2025년 6월' : 'Jun 2025', sales: 680000000, returns: 30000000, net: 650000000 },
-    { month: locale === 'ko' ? '2025년 5월' : 'May 2025', sales: 750000000, returns: 33000000, net: 717000000 },
-    { month: locale === 'ko' ? '2025년 4월' : 'Apr 2025', sales: 820000000, returns: 36000000, net: 784000000 },
-    { month: locale === 'ko' ? '2025년 3월' : 'Mar 2025', sales: 890000000, returns: 39000000, net: 851000000 },
-  ];
+  // Filter only sales invoices
+  const salesInvoices = taxInvoices.filter(inv => inv.type === 'sales');
 
-  const yearlyData = [
-    { year: '2026', sales: 1541000000, returns: 70800000, net: 1470200000 },
-    { year: '2025', sales: 8910000000, returns: 372000000, net: 8538000000 },
-    { year: '2024', sales: 7650000000, returns: 340000000, net: 7310000000 },
-    { year: '2023', sales: 6200000000, returns: 290000000, net: 5910000000 },
-    { year: '2022', sales: 5100000000, returns: 250000000, net: 4850000000 },
-  ];
+  // Group by date for daily view
+  const dailyGroups = salesInvoices.reduce((acc, inv) => {
+    const date = inv.issueDate;
+    if (!acc[date]) {
+      acc[date] = { sales: 0, returns: 0 };
+    }
+    acc[date].sales += inv.totalAmount;
+    return acc;
+  }, {} as Record<string, { sales: number; returns: number }>);
+
+  const dailyData = Object.entries(dailyGroups)
+    .map(([date, data]) => ({
+      date,
+      sales: data.sales,
+      returns: data.returns,
+      net: data.sales - data.returns,
+    }))
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  // Group by month for monthly view
+  const monthlyGroups = salesInvoices.reduce((acc, inv) => {
+    const date = new Date(inv.issueDate);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    if (!acc[monthKey]) {
+      acc[monthKey] = { sales: 0, returns: 0, year: date.getFullYear(), month: date.getMonth() + 1 };
+    }
+    acc[monthKey].sales += inv.totalAmount;
+    return acc;
+  }, {} as Record<string, { sales: number; returns: number; year: number; month: number }>);
+
+  const monthlyData = Object.entries(monthlyGroups)
+    .map(([key, data]) => ({
+      month: locale === 'ko' ? `${data.year}년 ${data.month}월` : new Date(data.year, data.month - 1).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+      sales: data.sales,
+      returns: data.returns,
+      net: data.sales - data.returns,
+    }))
+    .sort((a, b) => b.month.localeCompare(a.month));
+
+  // Group by year for yearly view
+  const yearlyGroups = salesInvoices.reduce((acc, inv) => {
+    const year = new Date(inv.issueDate).getFullYear().toString();
+    if (!acc[year]) {
+      acc[year] = { sales: 0, returns: 0 };
+    }
+    acc[year].sales += inv.totalAmount;
+    return acc;
+  }, {} as Record<string, { sales: number; returns: number }>);
+
+  const yearlyData = Object.entries(yearlyGroups)
+    .map(([year, data]) => ({
+      year,
+      sales: data.sales,
+      returns: data.returns,
+      net: data.sales - data.returns,
+    }))
+    .sort((a, b) => b.year.localeCompare(a.year));
 
   const currentData = viewMode === 'daily' ? dailyData : viewMode === 'monthly' ? monthlyData : yearlyData;
   const totalSales = currentData.reduce((sum, d) => sum + d.sales, 0);
