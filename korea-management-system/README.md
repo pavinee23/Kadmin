@@ -64,4 +64,4 @@ korea-management-system/
 
 ## 📝 라이선스
 
-© 2026 Korea Management System. All rights reserved.
+© 2026 Zera co.,Ltd Korea Management System. All rights reserved.

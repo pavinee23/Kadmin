@@ -1,5 +1,5 @@
 interface CountryFlagProps {
-  country: 'KR' | 'GB' | 'BN' | 'TH' | 'VN' | 'CN';
+  country?: 'KR' | 'GB' | 'BN' | 'TH' | 'VN' | 'CN';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
@@ -13,6 +13,26 @@ export default function CountryFlag({ country, size = 'md', className = '' }: Co
   };
 
   const dimensions = sizeMap[size];
+
+  // Handle undefined country prop
+  if (!country) {
+    return (
+      <div 
+        className={`inline-block rounded bg-gray-200 ${className}`}
+        style={{ 
+          width: dimensions.width, 
+          height: dimensions.height,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '10px',
+          color: '#666'
+        }}
+      >
+        ?
+      </div>
+    );
+  }
 
   return (
     <img 

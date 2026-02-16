@@ -20,6 +20,7 @@ import {
   DollarSign,
   FileText,
   MapPin,
+  Activity,
 } from 'lucide-react';
 
 export default function InternationalMarketDashboardPage() {
@@ -129,6 +130,22 @@ export default function InternationalMarketDashboardPage() {
       count: currentData.equipmentTest,
     },
     {
+      icon: Activity,
+      title: locale === 'ko' ? 'KSAVE 설치전 전류분석' : 'Pre-Installation Current Analysis',
+      description: locale === 'ko' ? '설치전 전류측정 및 L1 L2 L3 N 분석' : 'Pre-installation current measurement and L1 L2 L3 N analysis',
+      href: '/international-market/pre-installation-analysis',
+      color: 'bg-orange-500',
+      count: null,
+    },
+    {
+      icon: Globe,
+      title: t.internationalShipments,
+      description: t.internationalShipmentsDesc,
+      href: '/international-market/international-shipments',
+      color: 'bg-teal-500',
+      count: null,
+    },
+    {
       icon: FileText,
       title: locale === 'ko' ? '견적서' : 'Quotations',
       description: locale === 'ko' ? '지점별 견적서 관리 및 추적' : 'Quotation management and tracking per branch',
@@ -143,8 +160,7 @@ export default function InternationalMarketDashboardPage() {
       href: '/international-market/sales-expense-reports',
       color: 'bg-emerald-500',
       count: null,
-    },
-  ];
+    },];
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat(locale === 'ko' ? 'ko-KR' : 'en-US').format(value);

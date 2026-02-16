@@ -16,6 +16,10 @@ export const translations = {
     notifications: '알림',
     settings: '설정',
     back: '← 뒤로',
+    quotation: '견적서',
+    quotationMenu: '견적 관리',
+    newQuotation: '새 견적서',
+    viewQuotations: '견적서 보기',
     
     // Home Page
     welcome: '환영합니다!',
@@ -259,7 +263,7 @@ export const translations = {
     noEvaluationData: '평가 데이터가 없습니다',
     
     // Footer
-    copyright: '© 2026 Korea Management System. All rights reserved.',
+    copyright: '© 2026 Zera co.,Ltd Korea Management System. All rights reserved.',
     
     // Login Page
     loginTitle: '시스템 로그인',
@@ -532,6 +536,29 @@ export const translations = {
     monthlyUsage: '월 사용량',
     monthlyCost: '월 비용',
     estimatedAnnualCost: '예상 연간 비용',
+    
+    // Pre-installation Current Analysis
+    preInstallationAnalysis: 'KSAVE 사전 설치 전류 분석',
+    preInstallationAnalysisDesc: '설치 전 전류 측정 및 L1 L2 L3 N 분석',
+    currentMeasurement: '전류 측정',
+    threePhaseAnalysis: '3상 전류 분석',
+    lineL1: 'L1상',
+    lineL2: 'L2상', 
+    lineL3: 'L3상',
+    neutralLine: 'N(중성선)',
+    measurementDevice: '측정기기',
+    measurementDateTime: '측정 일시',
+    phaseBalance: '상 균형',
+    totalHarmonicDistortion: '총 고조파 왜곡률(THD)',
+    powerFactor: '역률',
+    frequency: '주파수',
+    peakCurrent: '피크 전류',
+    rmsCurrent: 'RMS 전류',
+    analysisResult: '분석 결과',
+    recommendedAction: '권장 조치',
+    installationReady: '설치 준비 완료',
+    requiresAdjustment: '조정 필요',
+    notRecommended: '설치 권장하지 않음',
     inspectionNumber: '점검 번호',
     siteLocation: '현장 위치',
     inspector: '점검자',
@@ -590,6 +617,41 @@ export const translations = {
     domesticMarket: '국내 시장',
     region: '지역',
     allRegions: '전체 지역',
+    
+    // Domestic Shipments
+    domesticShipments: '국내 배송 현황',
+    domesticShipmentsDesc: '국내 지역별 배송 추적 및 관리',
+    domesticDelivery: '국내 배송',
+    regionalShipment: '지역별 배송',
+    koreanAddress: '한국 주소',
+    domesticCarrier: '국내 운송업체',
+    domesticTracking: '국내 배송 추적',
+    withinKorea: '국내',
+    koreanRegions: '한국 지역',
+    deliveryToRegion: '지역별 배송',
+    seoulMetro: '서울/수도권',
+    busanArea: '부산/경남',
+    daeguArea: '대구/경북',
+    daejeonArea: '대전/충청',
+    gwangjuArea: '광주/전라',
+    incheonArea: '인천/강원',
+    jejuIsland: '제주도',
+    
+    // International Shipments
+    internationalShipments: '해외 배송 현황',
+    internationalShipmentsDesc: '해외 지점별 배송 추적 및 관리',
+    internationalDelivery: '해외 배송',
+    overseasShipment: '해외 배송',
+    destinationCountry: '목적지 국가',
+    internationalCarrier: '국제 운송업체',
+    globalTracking: '국제 배송 추적',
+    customsClearance: '통관 통과',
+    exportDocuments: '수출 서류',
+    airShipment: '항공 배송',
+    seaShipment: '해상 배송',
+    landShipment: '육로 배송',
+    shippingCost: '배송비용',
+    estimatedTransitTime: '예상 운송기간',
 
     // Logistics Department
     logisticsDashboard: '물류 관리 대시보드',
@@ -688,6 +750,10 @@ export const translations = {
     notifications: 'Notifications',
     settings: 'Settings',
     back: '← Back',
+    quotation: 'Quotation',
+    quotationMenu: 'Quotation Management',
+    newQuotation: 'New Quotation',
+    viewQuotations: 'View Quotations',
     
     // Home Page
     welcome: 'Welcome!',
@@ -931,7 +997,7 @@ export const translations = {
     noEvaluationData: 'No evaluation data available',
     
     // Footer
-    copyright: '© 2026 Korea Management System. All rights reserved.',
+    copyright: '© 2026 Zera co.,Ltd Korea Management System. All rights reserved.',
     
     // Login Page
     loginTitle: 'System Login',
@@ -1204,6 +1270,29 @@ export const translations = {
     monthlyUsage: 'Monthly Usage',
     monthlyCost: 'Monthly Cost',
     estimatedAnnualCost: 'Estimated Annual Cost',
+    
+    // Pre-installation Current Analysis
+    preInstallationAnalysis: 'KSAVE Pre-Installation Current Analysis',
+    preInstallationAnalysisDesc: 'Pre-installation current measurement and L1 L2 L3 N analysis',
+    currentMeasurement: 'Current Measurement',
+    threePhaseAnalysis: 'Three-Phase Current Analysis',
+    lineL1: 'L1 Phase',
+    lineL2: 'L2 Phase',
+    lineL3: 'L3 Phase',
+    neutralLine: 'N (Neutral)',
+    measurementDevice: 'Measurement Device',
+    measurementDateTime: 'Measurement Date/Time',
+    phaseBalance: 'Phase Balance',
+    totalHarmonicDistortion: 'Total Harmonic Distortion (THD)',
+    powerFactor: 'Power Factor',
+    frequency: 'Frequency',
+    peakCurrent: 'Peak Current',
+    rmsCurrent: 'RMS Current',
+    analysisResult: 'Analysis Result',
+    recommendedAction: 'Recommended Action',
+    installationReady: 'Installation Ready',
+    requiresAdjustment: 'Requires Adjustment', 
+    notRecommended: 'Installation Not Recommended',
     inspectionNumber: 'Inspection Number',
     siteLocation: 'Site Location',
     inspector: 'Inspector',
@@ -1262,6 +1351,41 @@ export const translations = {
     domesticMarket: 'Domestic Market',
     region: 'Region',
     allRegions: 'All Regions',
+    
+    // Domestic Shipments
+    domesticShipments: 'Domestic Shipments Status',
+    domesticShipmentsDesc: 'Track and manage domestic regional deliveries',
+    domesticDelivery: 'Domestic Delivery',
+    regionalShipment: 'Regional Shipment',
+    koreanAddress: 'Korean Address',
+    domesticCarrier: 'Domestic Carrier',
+    domesticTracking: 'Domestic Tracking',
+    withinKorea: 'Within Korea',
+    koreanRegions: 'Korean Regions',
+    deliveryToRegion: 'Regional Delivery',
+    seoulMetro: 'Seoul/Metro',
+    busanArea: 'Busan/Gyeongnam',
+    daeguArea: 'Daegu/Gyeongbuk',
+    daejeonArea: 'Daejeon/Chungcheong',
+    gwangjuArea: 'Gwangju/Jeolla',
+    incheonArea: 'Incheon/Gangwon',
+    jejuIsland: 'Jeju Island',
+    
+    // International Shipments
+    internationalShipments: 'International Shipments Status',
+    internationalShipmentsDesc: 'Track and manage overseas branch deliveries',
+    internationalDelivery: 'International Delivery',
+    overseasShipment: 'Overseas Shipment',
+    destinationCountry: 'Destination Country',
+    internationalCarrier: 'International Carrier',
+    globalTracking: 'Global Tracking',
+    customsClearance: 'Customs Clearance',
+    exportDocuments: 'Export Documents',
+    airShipment: 'Air Shipment',
+    seaShipment: 'Sea Shipment',
+    landShipment: 'Land Shipment',
+    shippingCost: 'Shipping Cost',
+    estimatedTransitTime: 'Estimated Transit Time',
 
     // Logistics Department
     logisticsDashboard: 'Logistics Dashboard',

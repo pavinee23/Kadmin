@@ -20,6 +20,8 @@ import {
   MapPin,
   Building2,
   Receipt,
+  Activity,
+  Truck,
 } from 'lucide-react';
 
 export default function DomesticMarketDashboardPage() {
@@ -155,6 +157,22 @@ export default function DomesticMarketDashboardPage() {
       href: '/domestic-market/equipment-test',
       color: 'bg-red-500',
       count: currentData.equipmentTest,
+    },
+    {
+      icon: Activity,
+      title: locale === 'ko' ? 'KSAVE 설치전 전류분석' : 'Pre-Installation Current Analysis',
+      description: locale === 'ko' ? '설치전 전류측정 및 L1 L2 L3 N 분석' : 'Pre-installation current measurement and L1 L2 L3 N analysis',
+      href: '/domestic-market/pre-installation-analysis',
+      color: 'bg-orange-500',
+      count: null,
+    },
+    {
+      icon: Truck,
+      title: t.domesticShipments,
+      description: t.domesticShipmentsDesc,
+      href: '/domestic-market/domestic-shipments',
+      color: 'bg-teal-500',
+      count: null,
     },
     {
       icon: FileText,

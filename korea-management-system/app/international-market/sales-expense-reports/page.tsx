@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from '@/lib/LocaleContext';
 import { translations } from '@/lib/translations';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { ArrowLeft, BarChart3, TrendingUp, TrendingDown, DollarSign, Printer, FileDown } from 'lucide-react';
+import { ArrowLeft, BarChart3, TrendingUp, TrendingDown, DollarSign, Printer, FileDown, FileText } from 'lucide-react';
 
 interface BranchReport {
   branchKey: string;
@@ -143,7 +143,16 @@ export default function SalesExpenseReportsPage() {
                 <h1 className="text-xl font-bold text-gray-800">{t.salesExpenseReports}</h1>
               </div>
             </div>
-            <LanguageSwitcher />
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => router.push('/international-market/quotations')}
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <FileText className="w-4 h-4" />
+                {t.quotationMenu}
+              </button>
+              <LanguageSwitcher />
+            </div>
           </div>
         </div>
       </div>
