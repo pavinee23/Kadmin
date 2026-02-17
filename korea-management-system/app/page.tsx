@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, Users, FileText, BarChart3, Settings, Bell, MapPin, Package, Headphones, Wrench, Briefcase, FlaskConical, MessageCircle, Globe } from 'lucide-react';
+import { Home, Users, FileText, BarChart3, Settings, Bell, MapPin, Package, Headphones, Wrench, Briefcase, FlaskConical, MessageCircle, Globe, Network } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLocale } from '@/lib/LocaleContext';
@@ -120,6 +120,14 @@ export default function HomePage() {
       href: '/chat/vietnam-chat',
       color: 'bg-emerald-500'
     },
+    { 
+      icon: Network, 
+      title: locale === 'ko' ? 'Flow 시스템 연결' : 'Connect to Flow System',
+      description: locale === 'ko' ? 'Flow 워크플로우 시스템과 통합 및 연동' : 'Integration and connection with Flow workflow system',
+      href: 'https://flow.team/signin.act',
+      color: 'bg-pink-500',
+      external: true
+    },
   ];
 
   return (
@@ -186,19 +194,39 @@ export default function HomePage() {
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-          {features.map((feature, index) => (
-            <Link
-              key={index}
-              href={feature.href}
-              className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 group hover:-translate-y-1"
-            >
-              <div className={`w-12 h-12 ${feature.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                <feature.icon className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
-              <p className="text-gray-600 text-sm">{feature.description}</p>
-            </Link>
-          ))}
+          {features.map((feature, index) => {
+            const cardContent = (
+              <>
+                <div className={`w-12 h-12 ${feature.color} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                  <feature.icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-gray-600 text-sm">{feature.description}</p>
+              </>
+            );
+
+            const cardClassName = "bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 group hover:-translate-y-1 block";
+
+            return feature.external ? (
+              <a
+                key={index}
+                href={feature.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cardClassName}
+              >
+                {cardContent}
+              </a>
+            ) : (
+              <Link
+                key={index}
+                href={feature.href}
+                className={cardClassName}
+              >
+                {cardContent}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Stats Section */}
