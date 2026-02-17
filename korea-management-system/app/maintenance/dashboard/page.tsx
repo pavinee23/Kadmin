@@ -14,6 +14,7 @@ import {
   CheckCircle,
   Clock,
   Activity,
+  Workflow,
 } from 'lucide-react';
 
 export default function MaintenanceDashboardPage() {
@@ -60,6 +61,15 @@ export default function MaintenanceDashboardPage() {
       href: '/maintenance/history',
       color: 'bg-purple-500',
       count: null,
+    },
+    {
+      icon: Workflow,
+      title: t.flowSystem,
+      description: t.flowSystemDesc,
+      href: 'https://flow.team/signin.act',
+      color: 'bg-cyan-600',
+      count: null,
+      external: true
     },
   ];
 
@@ -136,6 +146,35 @@ export default function MaintenanceDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {menuCards.map((card, index) => {
             const Icon = card.icon;
+            const isExternal = card.external;
+            
+            if (isExternal) {
+              return (
+                <a
+                  key={index}
+                  href={card.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 text-left group"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className={`${card.color} w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                      <Icon className="w-7 h-7 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-lg font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors">{card.title}</h3>
+                        {card.count !== null && (
+                          <span className="bg-indigo-100 text-indigo-600 text-xs font-bold px-2 py-1 rounded-full">{card.count}</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600">{card.description}</p>
+                    </div>
+                  </div>
+                </a>
+              );
+            }
+            
             return (
               <button
                 key={index}

@@ -183,7 +183,7 @@ export default function BranchDashboard() {
               </button>
               
               {/* Company Logo (Small) */}
-              <CompanyLogo size="sm" />
+              <CompanyLogo size="2xl" />
               
               {/* Branch Info */}
               <div className="flex items-center gap-3 border-l-2 border-gray-200 pl-4">

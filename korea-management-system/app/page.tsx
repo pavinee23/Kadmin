@@ -130,7 +130,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {/* Company Logo */}
-              <CompanyLogo size="md" />
+              <CompanyLogo size="2xl" />
               
               {/* Company & System Info */}
               <div className="border-l-2 border-gray-200 pl-4">

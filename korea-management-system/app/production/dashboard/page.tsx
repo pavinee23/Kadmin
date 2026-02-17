@@ -17,7 +17,8 @@ import {
   ClipboardCheck,
   BarChart3,
   PieChart,
-  Activity 
+  Activity,
+  Workflow
 } from 'lucide-react';
 
 export default function ProductionDashboardPage() {
@@ -175,6 +176,15 @@ export default function ProductionDashboardPage() {
       href: '/production/qa-reports',
       color: 'bg-emerald-500',
       count: 8
+    },
+    {
+      icon: Workflow,
+      title: t.flowSystem,
+      description: t.flowSystemDesc,
+      href: 'https://flow.team/signin.act',
+      color: 'bg-cyan-600',
+      count: null,
+      external: true
     }
   ];
 
@@ -444,6 +454,41 @@ export default function ProductionDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {menuCards.map((card, index) => {
             const Icon = card.icon;
+            const isExternal = card.external;
+            
+            if (isExternal) {
+              return (
+                <a
+                  key={index}
+                  href={card.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 text-left group block"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className={`${card.color} w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                      <Icon className="w-7 h-7 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-lg font-semibold text-gray-800 group-hover:text-orange-600 transition-colors">
+                          {card.title}
+                        </h3>
+                        {card.count !== null && (
+                          <span className="bg-orange-100 text-orange-600 text-xs font-bold px-2 py-1 rounded-full">
+                            {card.count}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        {card.description}
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              );
+            }
+            
             return (
               <button
                 key={index}

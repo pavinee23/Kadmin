@@ -219,7 +219,7 @@ export default function ChatPage({ params }: { params: { branch: string } }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <CompanyLogo size="md" />
+              <CompanyLogo size="2xl" />
               <div className="border-l-2 border-gray-200 pl-4">
                 <div className="flex items-center gap-2 mb-1">
                   <h1 className="text-xl font-bold text-blue-600">{t.companyName}</h1>

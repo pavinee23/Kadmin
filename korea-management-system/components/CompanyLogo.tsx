@@ -1,7 +1,7 @@
 import Image from 'next/image';
 
 interface CompanyLogoProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   className?: string;
 }
 
@@ -10,12 +10,16 @@ export default function CompanyLogo({ size = 'md', className = '' }: CompanyLogo
     sm: 32,
     md: 48,
     lg: 64,
+    xl: 80,
+    '2xl': 100,
   };
 
   const sizeClasses = {
     sm: 'w-8 h-8',
     md: 'w-12 h-12',
     lg: 'w-16 h-16',
+    xl: 'w-20 h-20',
+    '2xl': 'w-24 h-24',
   };
 
   return (

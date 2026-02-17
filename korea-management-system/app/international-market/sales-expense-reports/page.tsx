@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from '@/lib/LocaleContext';
 import { translations } from '@/lib/translations';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { ArrowLeft, BarChart3, TrendingUp, TrendingDown, DollarSign, Printer, FileDown, FileText } from 'lucide-react';
+import CountryFlag from '@/components/CountryFlag';
+import { ArrowLeft, BarChart3, TrendingUp, TrendingDown, DollarSign, Printer, FileDown, FileText, ChevronDown } from 'lucide-react';
 
 interface BranchReport {
   branchKey: string;
@@ -23,14 +24,35 @@ export default function SalesExpenseReportsPage() {
   const { locale } = useLocale();
   const t = translations[locale];
   const [branchFilter, setBranchFilter] = useState('all');
+  const [showBranchDropdown, setShowBranchDropdown] = useState(false);
   const [viewMode, setViewMode] = useState<'quarterly' | 'monthly'>('quarterly');
+  const branchDropdownRef = useRef<HTMLDivElement>(null);
 
   const branches = [
-    { key: 'korea', name: t.korea, currency: '₩', flag: '🇰🇷' },
-    { key: 'brunei', name: t.brunei, currency: 'B$', flag: '🇧🇳' },
-    { key: 'thailand', name: t.thailand, currency: '฿', flag: '🇹🇭' },
-    { key: 'vietnam', name: t.vietnam, currency: '₫', flag: '🇻🇳' },
+    { key: 'korea', name: t.korea, currency: '₩', country: 'KR' as const },
+    { key: 'brunei', name: t.brunei, currency: 'B$', country: 'BN' as const },
+    { key: 'thailand', name: t.thailand, currency: '฿', country: 'TH' as const },
+    { key: 'vietnam', name: t.vietnam, currency: '₫', country: 'VN' as const },
   ];
+
+  const selectedBranchOption = branches.find(b => b.key === branchFilter) || { key: 'all', name: t.allBranches, currency: '', country: null };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (branchDropdownRef.current && !branchDropdownRef.current.contains(event.target as Node)) {
+        setShowBranchDropdown(false);
+      }
+    };
+
+    if (showBranchDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showBranchDropdown]);
 
   const monthNames = locale === 'ko'
     ? ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월']
@@ -126,6 +148,232 @@ export default function SalesExpenseReportsPage() {
     return Math.max(...data.map(d => Math.max(d.sales, d.expenses)));
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleExportPDF = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const currentBranch = branchFilter === 'all' ? null : branches.find(b => b.key === branchFilter);
+    const reportBranches = branchFilter === 'all' ? branches : [currentBranch!];
+    
+    let contentHTML = '';
+    
+    reportBranches.forEach(branch => {
+      const report = branchReports[branch.key];
+      const totalSales = Object.values(report.quarterly).reduce((sum, q) => sum + q.sales, 0);
+      const totalExpenses = Object.values(report.quarterly).reduce((sum, q) => sum + q.expenses, 0);
+      const totalProfit = totalSales - totalExpenses;
+      const profitMargin = ((totalProfit / totalSales) * 100).toFixed(1);
+
+      contentHTML += `
+        <div class="branch-section">
+          <div class="branch-header">
+            <div class="branch-info">
+              ${branch.country ? `<img src="https://flagcdn.com/${branch.country.toLowerCase()}.svg" class="flag" alt="flag" />` : ''}
+              <h2>${branch.name}</h2>
+            </div>
+            <div class="summary-stats">
+              <div class="stat">
+                <span class="label">${locale === 'ko' ? '총 매출' : 'Total Sales'}</span>
+                <span class="value">${formatCurrency(totalSales, branch.key)}</span>
+              </div>
+              <div class="stat">
+                <span class="label">${locale === 'ko' ? '총 비용' : 'Total Expenses'}</span>
+                <span class="value">${formatCurrency(totalExpenses, branch.key)}</span>
+              </div>
+              <div class="stat">
+                <span class="label">${locale === 'ko' ? '순이익' : 'Net Profit'}</span>
+                <span class="value profit">${formatCurrency(totalProfit, branch.key)}</span>
+              </div>
+              <div class="stat">
+                <span class="label">${locale === 'ko' ? '이익률' : 'Profit Margin'}</span>
+                <span class="value">${profitMargin}%</span>
+              </div>
+            </div>
+          </div>
+          <div class="quarters">
+            ${Object.entries(report.quarterly).map(([q, data]) => `
+              <div class="quarter">
+                <h3>${q.toUpperCase()}</h3>
+                <div class="quarter-data">
+                  <div><span class="label">${locale === 'ko' ? '매출' : 'Sales'}:</span> <span>${formatCurrency(data.sales, branch.key)}</span></div>
+                  <div><span class="label">${locale === 'ko' ? '비용' : 'Expenses'}:</span> <span>${formatCurrency(data.expenses, branch.key)}</span></div>
+                  <div class="profit-line"><span class="label">${locale === 'ko' ? '이익' : 'Profit'}:</span> <span class="profit">${formatCurrency(data.profit, branch.key)}</span></div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    });
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${locale === 'ko' ? '해외 사업부 판매 및 비용 보고서' : 'International Sales & Expense Reports'}</title>
+  <style>
+    @media print {
+      @page { 
+        size: A4 landscape;
+        margin: 1cm;
+      }
+      body { margin: 0; padding: 0 !important; }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      line-height: 1.4;
+      color: #1f2937;
+      margin: 0;
+      padding: 1cm;
+      font-size: 11px;
+    }
+    .header {
+      text-align: center;
+      border-bottom: 3px solid #10b981;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+    .company-name {
+      font-size: 20px;
+      font-weight: bold;
+      color: #065f46;
+      margin-bottom: 5px;
+    }
+    .report-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #4b5563;
+    }
+    .branch-section {
+      margin-bottom: 25px;
+      page-break-inside: avoid;
+    }
+    .branch-header {
+      background: #f0fdf4;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid #10b981;
+      margin-bottom: 15px;
+    }
+    .branch-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .flag {
+      width: 24px;
+      height: 18px;
+    }
+    .branch-info h2 {
+      margin: 0;
+      font-size: 16px;
+      color: #065f46;
+    }
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .stat {
+      display: flex;
+      flex-direction: column;
+    }
+    .stat .label {
+      font-size: 9px;
+      color: #6b7280;
+      font-weight: 600;
+    }
+    .stat .value {
+      font-size: 13px;
+      font-weight: bold;
+      color: #111827;
+    }
+    .stat .value.profit {
+      color: #10b981;
+    }
+    .quarters {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .quarter {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 10px;
+    }
+    .quarter h3 {
+      margin: 0 0 8px 0;
+      font-size: 12px;
+      color: #10b981;
+      font-weight: bold;
+    }
+    .quarter-data {
+      font-size: 10px;
+    }
+    .quarter-data > div {
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .quarter-data .label {
+      color: #6b7280;
+      font-weight: 600;
+    }
+    .quarter-data .profit-line {
+      border-top: 1px solid #e5e7eb;
+      padding-top: 4px;
+      margin-top: 4px;
+    }
+    .quarter-data .profit {
+      color: #10b981;
+      font-weight: bold;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 9px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="company-name">K ENERGY SAVE CO., LTD. (Group of Zera)</div>
+    <div class="report-title">${locale === 'ko' ? '해외 사업부 판매 및 비용 보고서' : 'International Sales & Expense Reports'}</div>
+    <div style="margin-top: 5px; font-size: 10px; color: #6b7280;">${viewMode === 'quarterly' ? (locale === 'ko' ? '분기별 보고서' : 'Quarterly Report') : (locale === 'ko' ? '월별 보고서' : 'Monthly Report')} - ${new Date().toLocaleDateString()}</div>
+  </div>
+  
+  ${contentHTML}
+  
+  <div class="footer">
+    <p><strong>K Energy Save Co., Ltd.</strong></p>
+    <p>International Market Division</p>
+  </div>
+
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 500);
+    };
+  </script>
+</body>
+</html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100">
       {/* Header */}
@@ -144,13 +392,6 @@ export default function SalesExpenseReportsPage() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <button 
-                onClick={() => router.push('/international-market/quotations')}
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <FileText className="w-4 h-4" />
-                {t.quotationMenu}
-              </button>
               <LanguageSwitcher />
             </div>
           </div>
@@ -161,10 +402,49 @@ export default function SalesExpenseReportsPage() {
         {/* Controls */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">
           <div className="flex flex-wrap items-center gap-4">
-            <select value={branchFilter} onChange={e => setBranchFilter(e.target.value)} className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
-              <option value="all">{t.allBranches}</option>
-              {branches.map(b => <option key={b.key} value={b.key}>{b.flag} {b.name}</option>)}
-            </select>
+            {/* Custom Branch Dropdown */}
+            <div ref={branchDropdownRef} className="relative">
+              <button
+                onClick={() => setShowBranchDropdown(!showBranchDropdown)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white hover:bg-gray-50 flex items-center gap-2 min-w-[200px] justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  {selectedBranchOption.country && (
+                    <CountryFlag country={selectedBranchOption.country} size="sm" />
+                  )}
+                  <span className="text-sm text-gray-700">{selectedBranchOption.name}</span>
+                </div>
+                <ChevronDown className="w-4 h-4 text-gray-400" />
+              </button>
+              
+              {/* Dropdown Menu */}
+              {showBranchDropdown && (
+                <div className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  <button
+                    onClick={() => {
+                      setBranchFilter('all');
+                      setShowBranchDropdown(false);
+                    }}
+                    className="w-full px-4 py-2.5 text-left hover:bg-emerald-50 flex items-center gap-2 border-b border-gray-100"
+                  >
+                    <span className="text-sm text-gray-700">{t.allBranches}</span>
+                  </button>
+                  {branches.map((branch) => (
+                    <button
+                      key={branch.key}
+                      onClick={() => {
+                        setBranchFilter(branch.key);
+                        setShowBranchDropdown(false);
+                      }}
+                      className="w-full px-4 py-2.5 text-left hover:bg-emerald-50 flex items-center gap-2 border-b border-gray-100 last:border-b-0"
+                    >
+                      <CountryFlag country={branch.country} size="sm" />
+                      <span className="text-sm text-gray-700">{branch.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="flex bg-gray-100 rounded-lg p-1">
               <button onClick={() => setViewMode('quarterly')} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === 'quarterly' ? 'bg-emerald-600 text-white' : 'text-gray-600 hover:text-gray-800'}`}>
                 {t.quarterlyReport}
@@ -174,8 +454,13 @@ export default function SalesExpenseReportsPage() {
               </button>
             </div>
             <div className="ml-auto flex gap-2">
-              <button className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200"><Printer className="w-4 h-4" />{t.printDocument}</button>
-              <button className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700"><FileDown className="w-4 h-4" />{t.exportPDF}</button>
+              <button 
+                onClick={handleExportPDF}
+                className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
+              >
+                <Printer className="w-4 h-4" />
+                {locale === 'ko' ? '인쇄 리포트' : locale === 'th' ? 'พิมพ์รายงาน' : locale === 'vi' ? 'In Báo Cáo' : 'Print Report'}
+              </button>
             </div>
           </div>
         </div>
@@ -195,7 +480,7 @@ export default function SalesExpenseReportsPage() {
               <div className="bg-white rounded-t-lg shadow-md p-4 border-b-2 border-emerald-500">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{branch.flag}</span>
+                    <CountryFlag country={branch.country} size="lg" />
                     <h2 className="text-xl font-bold text-gray-800">{branch.name}</h2>
                   </div>
                   <div className="flex items-center gap-2">

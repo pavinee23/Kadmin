@@ -478,7 +478,7 @@ export default function ExecutiveDashboard() {
               <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
                 <ArrowLeft className="w-5 h-5" />
               </Link>
-              <CompanyLogo size="sm" />
+              <CompanyLogo size="2xl" />
               <div className="border-l-2 border-gray-200 pl-4">
                 <h1 className="text-xl font-bold text-slate-700">{t.executiveDepartment}</h1>
                 <p className="text-sm text-gray-500">{t.executiveDashboardTitle}</p>
