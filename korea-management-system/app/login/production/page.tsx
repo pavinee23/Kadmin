@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from '@/lib/LocaleContext';
 import { translations } from '@/lib/translations';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import CompanyLogo from '@/components/CompanyLogo';
+import CountryFlag from '@/components/CountryFlag';
 
 export default function ProductionLoginPage() {
   const router = useRouter();
@@ -49,12 +51,23 @@ export default function ProductionLoginPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-4xl">🏭</span>
+            {/* Company Logo */}
+            <div className="flex justify-center mb-4">
+              <CompanyLogo size="2xl" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <h1 className="text-lg font-bold text-gray-900">{t.companyName}</h1>
+              <CountryFlag country="KR" size="sm" />
+            </div>
+            {/* Department Info */}
+            <div className="flex items-center justify-center gap-2 my-3">
+              <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                <span className="text-xl">🏭</span>
+              </div>
+            </div>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">
               {t.productionDepartment}
-            </h1>
+            </h2>
             <p className="text-gray-600 text-sm">
               {t.productionDepartmentDesc}
             </p>
@@ -101,16 +114,6 @@ export default function ProductionLoginPage() {
               {locale === 'ko' ? '로그인' : 'Login'}
             </button>
           </form>
-
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-600 mb-2">
-              {locale === 'ko' ? '🔐 데모 계정:' : '🔐 Demo Account:'}
-            </p>
-            <p className="text-xs font-mono text-gray-700">
-              Username: production / Password: demo123
-            </p>
-          </div>
         </div>
       </div>
     </div>

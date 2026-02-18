@@ -160,7 +160,7 @@ export default function DepartmentLoginPage({ params }: { params: { department: 
             {/* Company Info */}
             <div className="text-center mb-6">
               <div className="flex justify-center mb-3">
-                <CompanyLogo size="md" />
+                <CompanyLogo size="2xl" />
               </div>
               <div className="flex items-center justify-center gap-2 mb-1">
                 <h1 className="text-lg font-bold text-gray-900">{t.companyName}</h1>
@@ -248,16 +248,6 @@ export default function DepartmentLoginPage({ params }: { params: { department: 
                 {isLoading ? t.loggingIn : t.loginButton}
               </button>
             </form>
-
-            {/* Footer Links */}
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                {t.noAccount}{' '}
-                <button className="text-blue-600 hover:text-blue-800 font-medium transition-colors">
-                  {t.contactAdmin}
-                </button>
-              </p>
-            </div>
           </div>
         </div>
 

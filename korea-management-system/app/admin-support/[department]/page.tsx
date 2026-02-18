@@ -114,7 +114,19 @@ export default function DepartmentAdminSupportPage({ params }: { params: { depar
   const [newMessage, setNewMessage] = useState('');
   const [isAdminOnline, setIsAdminOnline] = useState(true);
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
+  const [userName, setUserName] = useState('');
+  const [showNamePrompt, setShowNamePrompt] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Load user name from localStorage
+    const savedName = localStorage.getItem('chat-user-name');
+    if (savedName) {
+      setUserName(savedName);
+    } else {
+      setShowNamePrompt(true);
+    }
+  }, []);
 
   useEffect(() => {
     // Load messages from localStorage for this department
@@ -204,7 +216,7 @@ export default function DepartmentAdminSupportPage({ params }: { params: { depar
 
     const message: Message = {
       id: Date.now().toString(),
-      sender: locale === 'ko' ? '나' : 'You',
+      sender: userName || (locale === 'ko' ? '사용자' : 'User'),
       role: 'user',
       text: newMessage,
       timestamp: new Date(),
@@ -277,6 +289,52 @@ export default function DepartmentAdminSupportPage({ params }: { params: { depar
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Name Prompt Modal */}
+      {showNamePrompt && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">
+              {locale === 'ko' ? '이름을 입력하세요' : 'Enter Your Name'}
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              {locale === 'ko' 
+                ? '채팅에서 사용할 이름을 입력해주세요.' 
+                : 'Please enter your name for the chat.'}
+            </p>
+            <input
+              type="text"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && userName.trim()) {
+                  localStorage.setItem('chat-user-name', userName.trim());
+                  setShowNamePrompt(false);
+                }
+              }}
+              placeholder={locale === 'ko' ? '이름을 입력하세요...' : 'Enter your name...'}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+              autoFocus
+            />
+            <button
+              onClick={() => {
+                if (userName.trim()) {
+                  localStorage.setItem('chat-user-name', userName.trim());
+                  setShowNamePrompt(false);
+                }
+              }}
+              disabled={!userName.trim()}
+              className={`w-full py-3 rounded-lg font-medium transition-all ${
+                userName.trim()
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {locale === 'ko' ? '확인' : 'Confirm'}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -358,7 +416,12 @@ export default function DepartmentAdminSupportPage({ params }: { params: { depar
                     ) : (
                       <User className="w-4 h-4" />
                     )}
-                    <span className="font-semibold text-sm">{message.sender}</span>
+                    <span className="font-semibold text-sm">
+                      {message.role === 'user' 
+                        ? (userName || message.sender)
+                        : message.sender
+                      }
+                    </span>
                     <span className={`text-xs ${message.role === 'user' ? 'text-white/70' : 'text-gray-500'}`}>
                       {message.timestamp.toLocaleTimeString(locale === 'ko' ? 'ko-KR' : 'en-US', {
                         hour: '2-digit',
@@ -527,6 +590,20 @@ export default function DepartmentAdminSupportPage({ params }: { params: { depar
                   : `Chat with admin for ${departmentName} system issues or questions. Messages are saved specifically for this department.`
                 }
               </p>
+              <div className="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm text-gray-700">
+                    {locale === 'ko' ? '채팅 이름' : 'Chat Name'}: <strong>{userName || (locale === 'ko' ? '사용자' : 'User')}</strong>
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowNamePrompt(true)}
+                  className="text-xs text-blue-600 hover:text-blue-700 font-medium hover:underline"
+                >
+                  {locale === 'ko' ? '이름 변경' : 'Change Name'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

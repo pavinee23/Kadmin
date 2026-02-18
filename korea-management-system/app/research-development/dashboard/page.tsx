@@ -66,7 +66,16 @@ export default function ResearchDevelopmentDashboardPage() {
   const [selectedDepartment, setSelectedDepartment] = useState<DepartmentMessages | null>(null);
   const [replyText, setReplyText] = useState('');
   const [replyAttachments, setReplyAttachments] = useState<FileAttachment[]>([]);
+  const [userName, setUserName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Load user name from localStorage
+    const savedName = localStorage.getItem('chat-user-name');
+    if (savedName) {
+      setUserName(savedName);
+    }
+  }, []);
 
   const departmentConfigs = useMemo(() => ({
     'hr': { 
@@ -452,7 +461,12 @@ export default function ResearchDevelopmentDashboardPage() {
                       ) : (
                         <Users className="w-4 h-4" />
                       )}
-                      <span className="font-semibold text-sm">{message.sender}</span>
+                      <span className="font-semibold text-sm">
+                        {message.role === 'user'
+                          ? (userName || message.sender)
+                          : message.sender
+                        }
+                      </span>
                       <span className={`text-xs ${message.role === 'admin' ? 'text-white/70' : 'text-gray-500'}`}>
                         {new Date(message.timestamp).toLocaleTimeString(locale === 'ko' ? 'ko-KR' : 'en-US', {
                           hour: '2-digit',
