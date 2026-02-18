@@ -150,7 +150,7 @@ export default function DepartmentAdminSupportPage({ params }: { params: { depar
   const initializeWelcomeMessage = () => {
     const welcomeMessage: Message = {
       id: '1',
-      sender: locale === 'ko' ? '시스템 관리자' : 'System Administrator',
+      sender: locale === 'ko' ? '연구개발 부서' : 'Research & Development',
       role: 'admin',
       text: locale === 'ko' 
         ? `안녕하세요! ${departmentName} 담당 관리자입니다. 무엇을 도와드릴까요?` 
@@ -254,7 +254,7 @@ export default function DepartmentAdminSupportPage({ params }: { params: { depar
 
       const reply: Message = {
         id: (Date.now() + 1).toString(),
-        sender: locale === 'ko' ? `${departmentName} 관리자` : `${departmentName} Administrator`,
+        sender: locale === 'ko' ? '연구개발 부서' : 'Research & Development',
         role: 'admin',
         text: replyText,
         timestamp: new Date(),

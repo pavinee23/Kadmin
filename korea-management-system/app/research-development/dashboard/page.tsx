@@ -145,7 +145,7 @@ export default function ResearchDevelopmentDashboardPage() {
       clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [locale]);
 
   const loadAllDepartmentChats = () => {
     const chats: DepartmentMessages[] = [];
@@ -236,7 +236,7 @@ export default function ResearchDevelopmentDashboardPage() {
 
     const newMessage: Message = {
       id: Date.now().toString(),
-      sender: locale === 'ko' ? '시스템 관리자' : 'System Administrator',
+      sender: locale === 'ko' ? '연구개발 부서' : 'Research & Development',
       role: 'admin',
       text: replyText,
       timestamp: new Date().toISOString(),
