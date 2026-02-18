@@ -18,7 +18,8 @@ import {
   BarChart3,
   PieChart,
   Activity,
-  Workflow
+  Workflow,
+  Shield
 } from 'lucide-react';
 
 export default function ProductionDashboardPage() {
@@ -185,6 +186,14 @@ export default function ProductionDashboardPage() {
       color: 'bg-cyan-600',
       count: null,
       external: true
+    },
+    {
+      icon: Shield,
+      title: t.adminSupport,
+      description: t.adminSupportDesc,
+      href: '/admin-support/production',
+      color: 'bg-purple-500',
+      count: null
     }
   ];
 

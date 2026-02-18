@@ -15,6 +15,7 @@ import {
   Clock,
   Activity,
   Workflow,
+  Shield,
 } from 'lucide-react';
 
 export default function MaintenanceDashboardPage() {
@@ -70,6 +71,14 @@ export default function MaintenanceDashboardPage() {
       color: 'bg-cyan-600',
       count: null,
       external: true
+    },
+    {
+      icon: Shield,
+      title: t.adminSupport,
+      description: t.adminSupportDesc,
+      href: '/admin-support/maintenance',
+      color: 'bg-purple-500',
+      count: null,
     },
   ];
 

@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Clock,
   Workflow,
+  Shield,
 } from 'lucide-react';
 
 export default function QualityControlDashboardPage() {
@@ -70,6 +71,14 @@ export default function QualityControlDashboardPage() {
       color: 'bg-cyan-600',
       count: null,
       external: true
+    },
+    {
+      icon: Shield,
+      title: t.adminSupport,
+      description: t.adminSupportDesc,
+      href: '/admin-support/quality-control',
+      color: 'bg-purple-500',
+      count: null,
     },
   ];
 

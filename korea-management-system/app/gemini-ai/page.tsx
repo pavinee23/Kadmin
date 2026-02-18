@@ -32,7 +32,7 @@ export default function GeminiAIPage() {
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
-              💬 แชท
+              💬 Chat
             </button>
             <button
               onClick={() => setActiveTab('analyze')}
@@ -42,7 +42,7 @@ export default function GeminiAIPage() {
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
-              🔍 วิเคราะห์โค้ด
+              🔍 Analyze Code
             </button>
             <button
               onClick={() => setActiveTab('generate')}
@@ -52,7 +52,7 @@ export default function GeminiAIPage() {
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
-              ✨ สร้างโค้ด
+              ✨ Generate Code
             </button>
           </div>
 
@@ -80,25 +80,25 @@ export default function GeminiAIPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
           <div className="bg-white p-6 rounded-lg shadow">
             <div className="text-3xl mb-3">💬</div>
-            <h3 className="text-xl font-semibold mb-2">แชทอัจฉริยะ</h3>
+            <h3 className="text-xl font-semibold mb-2">Chat</h3>
             <p className="text-gray-600">
-              สนทนากับ AI เพื่อขอคำแนะนำ แก้ปัญหา หรือถามคำถามต่างๆ
+              Chat with AI for advice, problem-solving, or asking questions.
             </p>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow">
             <div className="text-3xl mb-3">🔍</div>
-            <h3 className="text-xl font-semibold mb-2">วิเคราะห์โค้ด</h3>
+            <h3 className="text-xl font-semibold mb-2">Analyze Code</h3>
             <p className="text-gray-600">
-              วิเคราะห์โค้ดของคุณ ตรวจสอบคุณภาพ และรับคำแนะนำการปรับปรุง
+              Analyze your code, check quality, and get improvement suggestions.
             </p>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow">
             <div className="text-3xl mb-3">✨</div>
-            <h3 className="text-xl font-semibold mb-2">สร้างโค้ด</h3>
+            <h3 className="text-xl font-semibold mb-2">Generate Code</h3>
             <p className="text-gray-600">
-              สร้างโค้ดจากคำอธิบาย รองรับหลายภาษาโปรแกรม
+              Generate code from descriptions, supporting multiple programming languages.
             </p>
           </div>
         </div>
@@ -109,23 +109,23 @@ export default function GeminiAIPage() {
           <div className="space-y-3 font-mono text-sm">
             <div className="border-l-4 border-blue-500 pl-4">
               <p className="font-semibold">POST /api/gemini/chat</p>
-              <p className="text-gray-600">แชทกับ Gemini AI</p>
+              <p className="text-gray-600">Chat with Gemini AI</p>
             </div>
             <div className="border-l-4 border-green-500 pl-4">
               <p className="font-semibold">POST /api/gemini/analyze</p>
-              <p className="text-gray-600">วิเคราะห์โค้ด</p>
+              <p className="text-gray-600">Analyze code</p>
             </div>
             <div className="border-l-4 border-purple-500 pl-4">
               <p className="font-semibold">POST /api/gemini/generate</p>
-              <p className="text-gray-600">สร้างโค้ดจากคำอธิบาย</p>
+              <p className="text-gray-600">Generate code from descriptions</p>
             </div>
             <div className="border-l-4 border-red-500 pl-4">
               <p className="font-semibold">POST /api/gemini/fix</p>
-              <p className="text-gray-600">แก้ไขโค้ดที่มีบั๊ก</p>
+              <p className="text-gray-600">Fix buggy code</p>
             </div>
             <div className="border-l-4 border-yellow-500 pl-4">
               <p className="font-semibold">POST /api/gemini/translate</p>
-              <p className="text-gray-600">แปลข้อความ</p>
+              <p className="text-gray-600">Translate text</p>
             </div>
           </div>
         </div>

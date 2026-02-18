@@ -22,6 +22,7 @@ import {
   History,
   Briefcase,
   Workflow,
+  Shield,
 } from 'lucide-react';
 
 export default function HRDashboardPage() {
@@ -133,6 +134,14 @@ export default function HRDashboardPage() {
       color: 'bg-cyan-500',
       count: null,
       external: true,
+    },
+    {
+      icon: Shield,
+      title: t.adminSupport,
+      description: t.adminSupportDesc,
+      href: '/admin-support/hr',
+      color: 'bg-purple-500',
+      count: null,
     },
   ];
 

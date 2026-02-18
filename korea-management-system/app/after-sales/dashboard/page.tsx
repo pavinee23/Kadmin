@@ -70,6 +70,14 @@ export default function AfterSalesDashboardPage() {
       count: null,
       external: true
     },
+    {
+      icon: Shield,
+      title: t.adminSupport,
+      description: t.adminSupportDesc,
+      href: '/admin-support/after-sales',
+      color: 'bg-purple-600',
+      count: null,
+    },
   ];
 
   return (

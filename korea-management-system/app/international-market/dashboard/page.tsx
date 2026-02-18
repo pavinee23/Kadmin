@@ -22,6 +22,7 @@ import {
   MapPin,
   Activity,
   Workflow,
+  Shield,
 } from 'lucide-react';
 
 export default function InternationalMarketDashboardPage() {
@@ -170,6 +171,14 @@ export default function InternationalMarketDashboardPage() {
       color: 'bg-cyan-600',
       count: null,
       external: true
+    },
+    {
+      icon: Shield,
+      title: t.adminSupport,
+      description: t.adminSupportDesc,
+      href: '/admin-support/international-market',
+      color: 'bg-purple-500',
+      count: null,
     }
   ];
 

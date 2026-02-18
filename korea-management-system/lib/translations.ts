@@ -373,6 +373,14 @@ export const translations = {
     flowSystemDesc: 'Flow 팀 협업 시스템 연결',
     connectToFlow: 'Flow에 연결',
     flowIntegration: 'Flow 통합',
+    
+    // Admin Support
+    adminSupport: '시스템 관리자 지원',
+    adminSupportDesc: '시스템 관리자와 실시간 채팅',
+    adminSupportChat: '관리자와 채팅',
+    adminSupportChatRoom: '관리자 지원 채팅방',
+    contactSystemAdmin: '시스템 관리자에게 문의',
+    adminChatDesc: '시스템 문제나 질문이 있으시면 관리자와 채팅하세요',
     askAI: 'AI에게 물어보기',
     aiChatbot: 'AI 챗봇',
     aiChatbotTitle: 'AI 어시스턴트 - 무엇이든 물어보세요',
@@ -1176,6 +1184,14 @@ export const translations = {
     flowSystemDesc: 'Connect to Flow team collaboration system',
     connectToFlow: 'Connect to Flow',
     flowIntegration: 'Flow Integration',
+    
+    // Admin Support
+    adminSupport: 'System Admin Support',
+    adminSupportDesc: 'Real-time chat with system administrator',
+    adminSupportChat: 'Chat with Admin',
+    adminSupportChatRoom: 'Admin Support Chat Room',
+    contactSystemAdmin: 'Contact System Administrator',
+    adminChatDesc: 'Chat with admin for system issues or questions',
     askAI: 'Ask AI',
     aiChatbot: 'AI Chatbot',
     aiChatbotTitle: 'AI Assistant - Ask me anything',

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useLocale } from '@/lib/LocaleContext';
 import { translations } from '@/lib/translations';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -19,7 +20,8 @@ import {
   Building2,
   Star,
   Calendar,
-  Eye
+  Eye,
+  Shield
 } from 'lucide-react';
 
 export default function CustomersPage() {
@@ -218,7 +220,16 @@ export default function CustomersPage() {
                 </div>
               </div>
             </div>
-            <LanguageSwitcher />
+            <div className="flex items-center gap-3">
+              <Link
+                href="/admin-support/customers"
+                className="flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
+              >
+                <Shield className="w-4 h-4" />
+                <span className="text-sm font-medium">{t.adminSupport}</span>
+              </Link>
+              <LanguageSwitcher />
+            </div>
           </div>
         </div>
       </div>
