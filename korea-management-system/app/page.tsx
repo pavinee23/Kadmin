@@ -1,8 +1,9 @@
 'use client';
 
-import { Home, Users, FileText, BarChart3, Settings, Bell, MapPin, Package, Headphones, Wrench, Briefcase, FlaskConical, MessageCircle, Globe, Network } from 'lucide-react';
+import { useEffect } from 'react';
+import { Home, Users, FileText, BarChart3, Settings, Bell, MapPin, Package, Headphones, Wrench, Briefcase, FlaskConical, MessageCircle, Globe, Network, LogOut } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useLocale } from '@/lib/LocaleContext';
 import { translations } from '@/lib/translations';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -11,8 +12,16 @@ import CompanyLogo from '@/components/CompanyLogo';
 
 export default function HomePage() {
   const pathname = usePathname();
+  const router = useRouter();
   const { locale } = useLocale();
   const t = translations[locale];
+
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('kms_auth');
+    if (!isLoggedIn) {
+      router.replace('/login');
+    }
+  }, [router]);
 
   const features = [
     { 
@@ -171,6 +180,16 @@ export default function HomePage() {
                     {locale === 'ko' ? '관리' : 'AD'}
                   </span>
                 </div>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('kms_auth');
+                    router.push('/login');
+                  }}
+                  title={locale === 'ko' ? '로그아웃' : 'Logout'}
+                  className="p-2 hover:bg-red-50 hover:text-red-600 text-gray-500 rounded-lg transition-colors"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
               </div>
             </div>
           </div>
