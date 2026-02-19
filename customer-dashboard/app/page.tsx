@@ -1,13 +1,23 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Package, ShoppingBag, TrendingUp, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useLocale } from '@/context/LocaleContext';
 import { translations } from '@/translations';
 
 export default function HomePage() {
+  const router = useRouter();
   const { locale } = useLocale();
   const t = translations[locale];
+
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('cd_auth');
+    if (!isLoggedIn) {
+      router.replace('/login');
+    }
+  }, [router]);
 
   const stats = [
     { label: t.totalOrders, value: '24', icon: ShoppingBag, color: 'bg-blue-500', change: '+12%' },

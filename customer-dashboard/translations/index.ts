@@ -187,6 +187,17 @@ export const translations = {
     deactivateDesc: 'Temporarily disable your account',
     deleteAccount: 'Delete Account',
     deleteDesc: 'Permanently delete your account and all data',
+
+    // Login
+    loginTitle: 'Sign In',
+    loginSubtitle: 'Enter your credentials to access your account',
+    emailOrUsername: 'Email or Username',
+    password: 'Password',
+    signIn: 'Sign In',
+    forgotPassword: 'Forgot Password?',
+    rememberMe: 'Remember me',
+    loginError: 'Invalid email or password',
+    loginLoading: 'Signing in...',
   },
   
   th: {
@@ -377,6 +388,17 @@ export const translations = {
     deactivateDesc: 'ปิดการใช้งานบัญชีชั่วคราว',
     deleteAccount: 'ลบบัญชี',
     deleteDesc: 'ลบบัญชีและข้อมูลทั้งหมดอย่างถาวร',
+
+    // Login
+    loginTitle: 'เข้าสู่ระบบ',
+    loginSubtitle: 'กรอกข้อมูลเพื่อเข้าถึงบัญชีของคุณ',
+    emailOrUsername: 'อีเมลหรือชื่อผู้ใช้',
+    password: 'รหัสผ่าน',
+    signIn: 'เข้าสู่ระบบ',
+    forgotPassword: 'ลืมรหัสผ่าน?',
+    rememberMe: 'จดจำฉัน',
+    loginError: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+    loginLoading: 'กำลังเข้าสู่ระบบ...',
   },
   
   zh: {
@@ -567,6 +589,17 @@ export const translations = {
     deactivateDesc: '暂时禁用您的账户',
     deleteAccount: '删除账户',
     deleteDesc: '永久删除您的账户和所有数据',
+
+    // Login
+    loginTitle: '登录',
+    loginSubtitle: '输入您的凭据以访问您的账户',
+    emailOrUsername: '邮箱或用户名',
+    password: '密码',
+    signIn: '登录',
+    forgotPassword: '忘记密码？',
+    rememberMe: '记住我',
+    loginError: '邮箱或密码无效',
+    loginLoading: '正在登录...',
   },
   
   ko: {
@@ -757,6 +790,17 @@ export const translations = {
     deactivateDesc: '계정을 임시로 비활성화',
     deleteAccount: '계정 삭제',
     deleteDesc: '계정과 모든 데이터를 영구적으로 삭제',
+
+    // Login
+    loginTitle: '로그인',
+    loginSubtitle: '계정에 접근하려면 인증 정보를 입력하세요',
+    emailOrUsername: '이메일 또는 사용자명',
+    password: '비밀번호',
+    signIn: '로그인',
+    forgotPassword: '비밀번호를 잊으셨나요?',
+    rememberMe: '로그인 유지',
+    loginError: '이메일 또는 비밀번호가 올바르지 않습니다',
+    loginLoading: '로그인 중...',
   },
   
   vi: {
@@ -947,6 +991,17 @@ export const translations = {
     deactivateDesc: 'Tạm thời vô hiệu hóa tài khoản của bạn',
     deleteAccount: 'Xóa tài khoản',
     deleteDesc: 'Xóa vĩnh viễn tài khoản và tất cả dữ liệu của bạn',
+
+    // Login
+    loginTitle: 'Đăng nhập',
+    loginSubtitle: 'Nhập thông tin đăng nhập để truy cập tài khoản của bạn',
+    emailOrUsername: 'Email hoặc tên người dùng',
+    password: 'Mật khẩu',
+    signIn: 'Đăng nhập',
+    forgotPassword: 'Quên mật khẩu?',
+    rememberMe: 'Ghi nhớ đăng nhập',
+    loginError: 'Email hoặc mật khẩu không hợp lệ',
+    loginLoading: 'Đang đăng nhập...',
   },
 };
 

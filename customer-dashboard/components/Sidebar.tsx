@@ -2,16 +2,22 @@
 
 import { Home, ShoppingBag, Package, User, HeadphonesIcon, Bell, Settings, LogOut, Zap, Menu, X } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useLocale } from '@/context/LocaleContext';
 import { translations } from '@/translations';
 import { useState, useEffect } from 'react';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { locale } = useLocale();
   const t = translations[locale];
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem('cd_auth');
+    router.push('/login');
+  };
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -93,7 +99,7 @@ export default function Sidebar() {
 
       {/* Logout */}
       <div className="p-4 border-t border-gray-200">
-        <button className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors w-full">
+        <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors w-full">
           <LogOut className="w-5 h-5" />
           <span className="font-medium">{t.logout}</span>
         </button>
