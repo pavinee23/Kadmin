@@ -1,25 +1,30 @@
-import React from "react"
-import './styles/globals.css'
-import { headers } from 'next/headers'
 import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { LocaleProvider } from '@/lib/LocaleContext'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-	title: "K Energy Save - ENERGY YOU CAN TRUST",
-	description: "Advanced power-saving technology with proven results. Cut your Electric Bill from day one!",
+  title: 'Korea Management System',
+  description: 'Comprehensive management system for Korea operations',
 }
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-	// Force dynamic rendering so pages using useSearchParams don't need Suspense
-	await headers()
-
-	return (
-		<html lang="en" translate="no" className="notranslate" suppressHydrationWarning>
-			<head>
-				<meta name="google" content="notranslate" />
-			</head>
-			<body suppressHydrationWarning>
-				{children}
-			</body>
-		</html>
-	)
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="ko">
+      <head>
+        <meta charSet="utf-8" />
+      </head>
+      <body className={inter.className}>
+        <LocaleProvider>
+          {children}
+        </LocaleProvider>
+      </body>
+    </html>
+  )
 }
